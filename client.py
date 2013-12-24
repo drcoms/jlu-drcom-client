@@ -266,7 +266,6 @@ def keep_alive1(salt,tail,pwd,svr):
     
 from uuid import getnode
 def main():
-    execfile(CONF, globals())
     print "config path:"+CONF+"\nauth svr:"+server+"\nusername:"+username+"\npassword:"+"********"+"\nmac:"+str(hex(mac))
     print "os:MSDOS 8.0"+"\nhostname: localhost" 
     print "DrCOM Auth Router Ver 1.2"
