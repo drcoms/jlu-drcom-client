@@ -1,13 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-@author: latyas, idea314
-"""
 import socket, struct, time
 from hashlib import md5
 import sys
 import urllib2
-import re,random
-import os
 
 class ChallengeException (Exception):
   def __init__(self):
@@ -24,7 +18,7 @@ s.settimeout(3)
 SALT = ''
 UNLIMITED_RETRY = True
 EXCEPTION = False
-DEBUG = False
+DEBUG = True
 server = "10.100.61.3" # "auth.jlu.edu.cn"
 username = "YOURUSERNAME"
 password = "YOURPASSWORD"
@@ -47,6 +41,8 @@ def challenge(svr,ran):
         break;
       else:
         continue
+    if DEBUG:
+      print '[DEBUG] challenge:\n' + data.encode('hex')
     if data[0] != '\x02':
       raise ChallengeException
     print '[challenge] challenge packet sent.'
@@ -79,6 +75,7 @@ def keep_alive_package_builder(number,random,tail,type=1,first=False):
     data += random + '\x00' * 6
     data += tail
     data += '\x00' * 4
+    #data += struct.pack("!H",0xdc02)
     if type == 3:
       foo = '\x31\x8c\x21\x3e' #CONSTANT
       #CRC
@@ -97,9 +94,17 @@ def packet_CRC(s):
     return ret
 
 def keep_alive2():
+    #first keep_alive:
+    #number = number (mod 7)
+    #status = 1: first packet user sended
+    #         2: first packet user recieved
+    #         3: 2nd packet user sended
+    #         4: 2nd packet user recieved
+    #   Codes for test
     tail = ''
     packet = ''
     svr = server
+    import random
     ran = random.randint(0,0xFFFF)
     ran += random.randint(1,10)   
     packet = keep_alive_package_builder(0,dump(ran),'\x00'*4,1,True)
@@ -118,7 +123,7 @@ def keep_alive2():
     s.sendto(packet, (svr, 61440))
     data, address = s.recvfrom(1024)
     tail = data[16:20]
-    print "[keep-alive] keep-alive was in daemon."
+    print "[keep-alive2] keep-alive2 loop was in daemon."
     
     i = 1
     while True:
@@ -126,14 +131,19 @@ def keep_alive2():
         time.sleep(5)
         ran += random.randint(1,10)   
         packet = keep_alive_package_builder(2,dump(ran),tail,1,False)
+        #print 'DEBUG: keep_alive2,packet 4\n',packet.encode('hex')
         s.sendto(packet, (svr, 61440))
         data, address = s.recvfrom(1024)
         tail = data[16:20]
+        #print 'DEBUG: keep_alive2,packet 4 return\n',data.encode('hex')
+        
         ran += random.randint(1,10)   
         packet = keep_alive_package_builder(2,dump(ran),tail,3,False)
+        #print 'DEBUG: keep_alive2,packet 5\n',packet.encode('hex')
         s.sendto(packet, (svr, 61440))
         data, address = s.recvfrom(1024)
         tail = data[16:20]
+        #print 'DEBUG: keep_alive2,packet 5 return\n',data.encode('hex')
         i = i+1
         
         check_online = urllib2.urlopen('http://10.100.61.3')
@@ -141,8 +151,20 @@ def keep_alive2():
         if 'login.jlu.edu.cn' in foo:
           print '[keep_alive2] offline.relogin...'
           break;
+        #MODIFIED END
+        ''' 
+        if i % 10 == 0:
+          check_online = urllib2.urlopen('http://10.100.61.3')
+          foo = check_online.read()
+          if 'login.jlu.edu.cn' in foo:
+            print '[keep_alive2] offline.relogin...'
+            break;
+        '''
       except:
         pass
+        
+    
+import re
 def checksum(s):
     ret = 1234
     for i in re.findall('....', s):
@@ -150,7 +172,6 @@ def checksum(s):
     ret = (1968 * ret) & 0xffffffff
     return struct.pack('<I', ret)
 
-# cracked by latyas
 def mkpkt(salt, usr, pwd, mac):
     data = '\x03\01\x00'+chr(len(usr)+20)
     data += md5sum('\x03\x01'+salt+pwd)
@@ -170,7 +191,10 @@ def mkpkt(salt, usr, pwd, mac):
     return data
 
 def login(usr, pwd, svr):
+    import random
     global SALT
+ 
+    i = 0
     while True:
         try:
             try:
@@ -188,22 +212,65 @@ def login(usr, pwd, svr):
             continue
         print '[login] packet sent.'
         if address == (svr, 61440):
-            if data[0] == '\x05':
-              print "[login] wrong password or something else.retry."
-              continue
+            if data[0] == '\x05' and i >= 5 and UNLIMITED_RETRY == False:
+              print '[login] wrong password, retried ' + str(i) +' times.'
+              sys.exit(1)
+            elif data[0] == '\x05':
+              print "[login] wrong password."
+              i = i + 1
+              time.sleep(i*1.618)
             elif data[0] != '\x02':
               print "[login] server return exception.retry"
+              if DEBUG:
+                print '[login] last packet server returned:\n' + data.encode('hex')
+              time.sleep(1)
               raise LoginException
-              continue
+              continue;
             break;
         else:
-              print '[login] packet error, retrying...'
+            if i >= 5 and UNLIMITED_RETRY == False :
+              print '[login] packet received error, maybe you are under attacking'
+              sys.exit(1)
+            else:
+              i = i + 1
+              print '[login] package error, retrying...'
               
-    print '[login] login done.'
+    print '[login] login sent'
     return data[-22:-6]
 
+import httplib
+def info(ip):
+    c = httplib.HTTPConnection(ip, 80, timeout=10)
+    c.request("GET", "")
+    r = c.getresponse()
+    if r.status != 200:
+        return None
+    s = r.read()
+    data = dict()
+    data["flux"] = int(s[s.index("flow='")+6:s.index("';fsele=")])
+    data["time"] = int(s[s.index("time='")+6:s.index("';flow")])
+    return data
+def keep_alive1(salt,tail,pwd,svr):
+    foo = struct.pack('!H',int(time.time())%0xFFFF)
+    data = '\xff' + md5sum('\x03\x01'+salt+pwd) + '\x00\x00\x00'
+    data += tail
+    data += foo + '\x00\x00\x00\x00'
+    print '[keep_alive1] keep_alive1,sent'
+    s.sendto(data, (svr, 61440))
+    try:
+        data, address = s.recvfrom(1024)
+        print '[keep_alive1] keep_alive1,server received'
+    except:
+        print '[keep_alive1] Timeout!'
+        pass
+    
+from uuid import getnode
 def main():
-    print "DrCOM Client FOR JLU"
+    execfile(CONF, globals())
+    print "config path:"+CONF+"\nauth svr:"+server+"\nusername:"+username+"\npassword:"+"********"+"\nmac:"+str(hex(mac))
+    print "os:MSDOS 8.0"+"\nhostname: localhost" 
+    print "DrCOM Auth Router Ver 1.2"
+    print "Version feature:\n[1] Auto Anti droping connection\n[2] Stronger exception handling."
     while True:
       try:
         package_tail = login(username, password, server)
@@ -212,5 +279,6 @@ def main():
       keep_alive2()
 if __name__ == "__main__":
     main()
+
 
 
