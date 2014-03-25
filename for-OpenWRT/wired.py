@@ -1,3 +1,8 @@
+# This code was written by two newbies of Python.
+# Please forgive damn style of the code
+# It works fine, although maybe crashes sometime, when this happens,
+# restarting the program and it would work fine again.
+
 import socket, struct, time
 from hashlib import md5
 import sys
@@ -16,15 +21,10 @@ s.bind(("0.0.0.0", 61440))
 
 s.settimeout(3)
 SALT = ''
+CONF = "/etc/drcom.conf"
 UNLIMITED_RETRY = True
 EXCEPTION = False
 DEBUG = True
-server = "10.100.61.3" # "auth.jlu.edu.cn"
-username = "YOURUSERNAME"
-password = "YOURPASSWORD"
-host_name = "LIYUANYUAN"
-host_os = "8089D"
-mac = 0xffffffffffff
 
 def challenge(svr,ran):
     while True:
@@ -78,14 +78,13 @@ def keep_alive_package_builder(number,random,tail,type=1,first=False):
     #data += struct.pack("!H",0xdc02)
     if type == 3:
       foo = '\x31\x8c\x21\x3e' #CONSTANT
-      #CRC
-      crc = packet_CRC(data+foo)
-      data += struct.pack("!I",crc) + foo + '\x00' * 8
+      checksum1 = packet_checksum1(data+foo)
+      data += struct.pack("!I",checksum1) + foo + '\x00' * 8
     else: #packet type = 1
       data += '\x00' * 16
     return data
 
-def packet_CRC(s):
+def packet_checksum1(s):
     ret = 0
     for i in re.findall('..', s):
         ret ^= struct.unpack('>h', i)[0]
@@ -96,10 +95,10 @@ def packet_CRC(s):
 def keep_alive2():
     #first keep_alive:
     #number = number (mod 7)
-    #status = 1: first packet user sended
-    #         2: first packet user recieved
-    #         3: 2nd packet user sended
-    #         4: 2nd packet user recieved
+    #status = 1: first packet that user sended
+    #         2: first packet that user recieved
+    #         3: 2nd packet that user sended
+    #         4: 2nd packet that user recieved
     #   Codes for test
     tail = ''
     packet = ''
@@ -265,7 +264,8 @@ def keep_alive1(salt,tail,pwd,svr):
         pass
     
 def main():
-    print "auth svr:"+server+"\nusername:"+username+"\npassword:"+"********"+"\nmac:"+str(hex(mac))
+    execfile(CONF, globals())
+    print "config path:"+CONF+"\nauth svr:"+server+"\nusername:"+username+"\npassword:"+"********"+"\nmac:"+str(hex(mac))
     print "os:MSDOS 8.0"+"\nhostname: localhost" 
     print "DrCOM Auth Router Ver 1.2"
     print "Version feature:\n[1] Auto Anti droping connection\n[2] Stronger exception handling."
@@ -274,9 +274,14 @@ def main():
         package_tail = login(username, password, server)
       except LoginException:
         continue
+      #print 'Tail: ',package_tail.encode('hex')
+      #keep_alive1(SALT,package_tail,password,server)
+      #inf = info(server)
+      #print "\nflow:"+str(inf['flux']/1024)+" MB \nused time:"+str(inf['time'])+" Min \nauth svr:"+server
       keep_alive2()
+      #time.sleep(2)
+      #print alive1
 if __name__ == "__main__":
     main()
-
 
 
