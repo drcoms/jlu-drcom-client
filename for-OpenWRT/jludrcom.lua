@@ -18,7 +18,8 @@ end
 
 
 function o.write(self, s, val)
-  local msg = ""
+  local msg
+  msg = ""
   if ori ~= val then
     fs.writefile("/etc/drcom.conf", val)
     msg = msg .. "<p>Configuration file updated.</p>"
