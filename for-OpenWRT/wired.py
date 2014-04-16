@@ -237,18 +237,6 @@ def login(usr, pwd, svr):
     print '[login] login sent'
     return data[-22:-6]
 
-import httplib
-def info(ip):
-    c = httplib.HTTPConnection(ip, 80, timeout=10)
-    c.request("GET", "")
-    r = c.getresponse()
-    if r.status != 200:
-        return None
-    s = r.read()
-    data = dict()
-    data["flux"] = int(s[s.index("flow='")+6:s.index("';fsele=")])
-    data["time"] = int(s[s.index("time='")+6:s.index("';flow")])
-    return data
 def keep_alive1(salt,tail,pwd,svr):
     foo = struct.pack('!H',int(time.time())%0xFFFF)
     data = '\xff' + md5sum('\x03\x01'+salt+pwd) + '\x00\x00\x00'
