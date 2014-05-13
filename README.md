@@ -4,7 +4,7 @@ DrCOM Client for jilin university
 有关其他学校
 -------------
 HITwh的Shindo酱优秀的项目,u62R0（理论上u64也是可以的），带802.1x <br>
-(EasyDrcom)[https://github.com/coverxit/EasyDrcom/blob/master/EasyDrcom/drcom_dealer.hpp]
+https://github.com/coverxit/EasyDrcom/
 
 U62R0-u64不带802.1x的版本, 主要用于debug, 实际使用（尤其是放在路由器里）还需要另作修改<br>
 https://github.com/drcoms/generic
