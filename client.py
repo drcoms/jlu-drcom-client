@@ -145,6 +145,7 @@ def keep_alive2():
         tail = data[16:20]
         #print 'DEBUG: keep_alive2,packet 5 return\n',data.encode('hex')
         i = i+1
+        i = i % (0xFF)
         
         check_online = urllib2.urlopen('http://10.100.61.3')
         foo = check_online.read()
