@@ -107,7 +107,7 @@ void challenge(int sock, struct sockaddr_in serv_addr, unsigned char *clg_data, 
 	int challenge_try = 0;
 	do {
 		if (challenge_try > CHALLENGE_TRY) {
-			fprintf(stderr, "[challenge]: try challenge, but failed, something wrong.\n");
+			fprintf(stderr, "[challenge]: try challenge, but failed, please check your network connection.\n");
 			close(sock);
 			exit(EXIT_FAILURE);
 		}
@@ -420,7 +420,6 @@ int main(int argc, char **argv)
 	login(sock, serv_addr, send_data, 338, recv_data, RECV_DATA_SIZE);
 		
 	// keep alive alive data length 42 or 40
-
 	unsigned char tail[4];
 	int tail_len = 4;
 	memset(tail, 0x00, tail_len);
