@@ -60,7 +60,7 @@ struct user_info_pkt {
 	//char SRC_ADDR[] = "169.255.255.255";
 	char user[] = "change to your account name here";
 	char pass[] = "change to your password here";
-	long mac = 0x000000000000; 
+	long mac = 0x000000000000; // echo 0x`ifconfig eth | egrep -io "(([0-9a-f]){2}:){5}[0-9a-f]{2}" | tr -d ":" `
 	char host[] = "fuxk-drcom";
 	char os[] = "fxck-drcom";
 	int user_len = sizeof(user) - 1;
