@@ -1,591 +1,397 @@
 /*
- *  RFC 1321 compliant MD5 implementation
- *
- *  Copyright (C) 2006-2014, Brainspark B.V.
- *
- *  This file is part of PolarSSL (http://www.polarssl.org)
- *  Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
- *
- *  All rights reserved.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+  Copyright (C) 1999, 2000, 2002 Aladdin Enterprises.  All rights reserved.
+
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
+
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
+
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
+
+  L. Peter Deutsch
+  ghost@aladdin.com
+
  */
+/* $Id: md5.c,v 1.6 2002/04/13 19:20:28 lpd Exp $ */
 /*
- *  The MD5 algorithm was designed by Ron Rivest in 1991.
- *
- *  http://www.ietf.org/rfc/rfc1321.txt
+  Independent implementation of MD5 (RFC 1321).
+
+  This code implements the MD5 Algorithm defined in RFC 1321, whose
+  text is available at
+	http://www.ietf.org/rfc/rfc1321.txt
+  The code is derived from the text of the RFC, including the test suite
+  (section A.5) but excluding the rest of Appendix A.  It does not include
+  any code or documentation that is identified in the RFC as being
+  copyrighted.
+
+  The original and principal author of md5.c is L. Peter Deutsch
+  <ghost@aladdin.com>.  Other authors are noted in the change history
+  that follows (in reverse chronological order):
+
+  2002-04-13 lpd Clarified derivation from RFC 1321; now handles byte order
+	either statically or dynamically; added missing #include <string.h>
+	in library.
+  2002-03-11 lpd Corrected argument list for main(), and added int return
+	type, in test program and T value program.
+  2002-02-21 lpd Added missing #include <stdio.h> in test program.
+  2000-07-03 lpd Patched to eliminate warnings about "constant is
+	unsigned in ANSI C, signed in traditional"; made test program
+	self-checking.
+  1999-11-04 lpd Edited comments slightly for automatic TOC extraction.
+  1999-10-18 lpd Fixed typo in header comment (ansi2knr rather than md5).
+  1999-05-03 lpd Original version.
  */
 
-#include "polarssl/config.h"
+#include "md5.h"
+#include <string.h>
 
-#if defined(POLARSSL_MD5_C)
-
-#include "polarssl/md5.h"
-
-#if defined(POLARSSL_FS_IO) || defined(POLARSSL_SELF_TEST)
-#include <stdio.h>
-#endif
-
-#if defined(POLARSSL_PLATFORM_C)
-#include "polarssl/platform.h"
+#undef BYTE_ORDER	/* 1 = big-endian, -1 = little-endian, 0 = unknown */
+#ifdef ARCH_IS_BIG_ENDIAN
+#  define BYTE_ORDER (ARCH_IS_BIG_ENDIAN ? 1 : -1)
 #else
-#define polarssl_printf printf
+#  define BYTE_ORDER 0
 #endif
 
-#if !defined(POLARSSL_MD5_ALT)
+#define T_MASK ((md5_word_t)~0)
+#define T1 /* 0xd76aa478 */ (T_MASK ^ 0x28955b87)
+#define T2 /* 0xe8c7b756 */ (T_MASK ^ 0x173848a9)
+#define T3    0x242070db
+#define T4 /* 0xc1bdceee */ (T_MASK ^ 0x3e423111)
+#define T5 /* 0xf57c0faf */ (T_MASK ^ 0x0a83f050)
+#define T6    0x4787c62a
+#define T7 /* 0xa8304613 */ (T_MASK ^ 0x57cfb9ec)
+#define T8 /* 0xfd469501 */ (T_MASK ^ 0x02b96afe)
+#define T9    0x698098d8
+#define T10 /* 0x8b44f7af */ (T_MASK ^ 0x74bb0850)
+#define T11 /* 0xffff5bb1 */ (T_MASK ^ 0x0000a44e)
+#define T12 /* 0x895cd7be */ (T_MASK ^ 0x76a32841)
+#define T13    0x6b901122
+#define T14 /* 0xfd987193 */ (T_MASK ^ 0x02678e6c)
+#define T15 /* 0xa679438e */ (T_MASK ^ 0x5986bc71)
+#define T16    0x49b40821
+#define T17 /* 0xf61e2562 */ (T_MASK ^ 0x09e1da9d)
+#define T18 /* 0xc040b340 */ (T_MASK ^ 0x3fbf4cbf)
+#define T19    0x265e5a51
+#define T20 /* 0xe9b6c7aa */ (T_MASK ^ 0x16493855)
+#define T21 /* 0xd62f105d */ (T_MASK ^ 0x29d0efa2)
+#define T22    0x02441453
+#define T23 /* 0xd8a1e681 */ (T_MASK ^ 0x275e197e)
+#define T24 /* 0xe7d3fbc8 */ (T_MASK ^ 0x182c0437)
+#define T25    0x21e1cde6
+#define T26 /* 0xc33707d6 */ (T_MASK ^ 0x3cc8f829)
+#define T27 /* 0xf4d50d87 */ (T_MASK ^ 0x0b2af278)
+#define T28    0x455a14ed
+#define T29 /* 0xa9e3e905 */ (T_MASK ^ 0x561c16fa)
+#define T30 /* 0xfcefa3f8 */ (T_MASK ^ 0x03105c07)
+#define T31    0x676f02d9
+#define T32 /* 0x8d2a4c8a */ (T_MASK ^ 0x72d5b375)
+#define T33 /* 0xfffa3942 */ (T_MASK ^ 0x0005c6bd)
+#define T34 /* 0x8771f681 */ (T_MASK ^ 0x788e097e)
+#define T35    0x6d9d6122
+#define T36 /* 0xfde5380c */ (T_MASK ^ 0x021ac7f3)
+#define T37 /* 0xa4beea44 */ (T_MASK ^ 0x5b4115bb)
+#define T38    0x4bdecfa9
+#define T39 /* 0xf6bb4b60 */ (T_MASK ^ 0x0944b49f)
+#define T40 /* 0xbebfbc70 */ (T_MASK ^ 0x4140438f)
+#define T41    0x289b7ec6
+#define T42 /* 0xeaa127fa */ (T_MASK ^ 0x155ed805)
+#define T43 /* 0xd4ef3085 */ (T_MASK ^ 0x2b10cf7a)
+#define T44    0x04881d05
+#define T45 /* 0xd9d4d039 */ (T_MASK ^ 0x262b2fc6)
+#define T46 /* 0xe6db99e5 */ (T_MASK ^ 0x1924661a)
+#define T47    0x1fa27cf8
+#define T48 /* 0xc4ac5665 */ (T_MASK ^ 0x3b53a99a)
+#define T49 /* 0xf4292244 */ (T_MASK ^ 0x0bd6ddbb)
+#define T50    0x432aff97
+#define T51 /* 0xab9423a7 */ (T_MASK ^ 0x546bdc58)
+#define T52 /* 0xfc93a039 */ (T_MASK ^ 0x036c5fc6)
+#define T53    0x655b59c3
+#define T54 /* 0x8f0ccc92 */ (T_MASK ^ 0x70f3336d)
+#define T55 /* 0xffeff47d */ (T_MASK ^ 0x00100b82)
+#define T56 /* 0x85845dd1 */ (T_MASK ^ 0x7a7ba22e)
+#define T57    0x6fa87e4f
+#define T58 /* 0xfe2ce6e0 */ (T_MASK ^ 0x01d3191f)
+#define T59 /* 0xa3014314 */ (T_MASK ^ 0x5cfebceb)
+#define T60    0x4e0811a1
+#define T61 /* 0xf7537e82 */ (T_MASK ^ 0x08ac817d)
+#define T62 /* 0xbd3af235 */ (T_MASK ^ 0x42c50dca)
+#define T63    0x2ad7d2bb
+#define T64 /* 0xeb86d391 */ (T_MASK ^ 0x14792c6e)
 
-/*
- * 32-bit integer manipulation macros (little endian)
- */
-#ifndef GET_UINT32_LE
-#define GET_UINT32_LE(n,b,i)                            \
-{                                                       \
-    (n) = ( (uint32_t) (b)[(i)    ]       )             \
-        | ( (uint32_t) (b)[(i) + 1] <<  8 )             \
-        | ( (uint32_t) (b)[(i) + 2] << 16 )             \
-        | ( (uint32_t) (b)[(i) + 3] << 24 );            \
-}
+
+static void
+md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
+{
+    md5_word_t
+	a = pms->abcd[0], b = pms->abcd[1],
+	c = pms->abcd[2], d = pms->abcd[3];
+    md5_word_t t;
+#if BYTE_ORDER > 0
+    /* Define storage only for big-endian CPUs. */
+    md5_word_t X[16];
+#else
+    /* Define storage for little-endian or both types of CPUs. */
+    md5_word_t xbuf[16];
+    const md5_word_t *X;
 #endif
 
-#ifndef PUT_UINT32_LE
-#define PUT_UINT32_LE(n,b,i)                            \
-{                                                       \
-    (b)[(i)    ] = (unsigned char) ( (n)       );       \
-    (b)[(i) + 1] = (unsigned char) ( (n) >>  8 );       \
-    (b)[(i) + 2] = (unsigned char) ( (n) >> 16 );       \
-    (b)[(i) + 3] = (unsigned char) ( (n) >> 24 );       \
-}
+    {
+#if BYTE_ORDER == 0
+	/*
+	 * Determine dynamically whether this is a big-endian or
+	 * little-endian machine, since we can use a more efficient
+	 * algorithm on the latter.
+	 */
+	static const int w = 1;
+
+	if (*((const md5_byte_t *)&w)) /* dynamic little-endian */
 #endif
-
-/*
- * MD5 context setup
- */
-void md5_starts( md5_context *ctx )
-{
-    ctx->total[0] = 0;
-    ctx->total[1] = 0;
-
-    ctx->state[0] = 0x67452301;
-    ctx->state[1] = 0xEFCDAB89;
-    ctx->state[2] = 0x98BADCFE;
-    ctx->state[3] = 0x10325476;
-}
-
-void md5_process( md5_context *ctx, const unsigned char data[64] )
-{
-    uint32_t X[16], A, B, C, D;
-
-    GET_UINT32_LE( X[ 0], data,  0 );
-    GET_UINT32_LE( X[ 1], data,  4 );
-    GET_UINT32_LE( X[ 2], data,  8 );
-    GET_UINT32_LE( X[ 3], data, 12 );
-    GET_UINT32_LE( X[ 4], data, 16 );
-    GET_UINT32_LE( X[ 5], data, 20 );
-    GET_UINT32_LE( X[ 6], data, 24 );
-    GET_UINT32_LE( X[ 7], data, 28 );
-    GET_UINT32_LE( X[ 8], data, 32 );
-    GET_UINT32_LE( X[ 9], data, 36 );
-    GET_UINT32_LE( X[10], data, 40 );
-    GET_UINT32_LE( X[11], data, 44 );
-    GET_UINT32_LE( X[12], data, 48 );
-    GET_UINT32_LE( X[13], data, 52 );
-    GET_UINT32_LE( X[14], data, 56 );
-    GET_UINT32_LE( X[15], data, 60 );
-
-#define S(x,n) ((x << n) | ((x & 0xFFFFFFFF) >> (32 - n)))
-
-#define P(a,b,c,d,k,s,t)                                \
-{                                                       \
-    a += F(b,c,d) + X[k] + t; a = S(a,s) + b;           \
-}
-
-    A = ctx->state[0];
-    B = ctx->state[1];
-    C = ctx->state[2];
-    D = ctx->state[3];
-
-#define F(x,y,z) (z ^ (x & (y ^ z)))
-
-    P( A, B, C, D,  0,  7, 0xD76AA478 );
-    P( D, A, B, C,  1, 12, 0xE8C7B756 );
-    P( C, D, A, B,  2, 17, 0x242070DB );
-    P( B, C, D, A,  3, 22, 0xC1BDCEEE );
-    P( A, B, C, D,  4,  7, 0xF57C0FAF );
-    P( D, A, B, C,  5, 12, 0x4787C62A );
-    P( C, D, A, B,  6, 17, 0xA8304613 );
-    P( B, C, D, A,  7, 22, 0xFD469501 );
-    P( A, B, C, D,  8,  7, 0x698098D8 );
-    P( D, A, B, C,  9, 12, 0x8B44F7AF );
-    P( C, D, A, B, 10, 17, 0xFFFF5BB1 );
-    P( B, C, D, A, 11, 22, 0x895CD7BE );
-    P( A, B, C, D, 12,  7, 0x6B901122 );
-    P( D, A, B, C, 13, 12, 0xFD987193 );
-    P( C, D, A, B, 14, 17, 0xA679438E );
-    P( B, C, D, A, 15, 22, 0x49B40821 );
-
-#undef F
-
-#define F(x,y,z) (y ^ (z & (x ^ y)))
-
-    P( A, B, C, D,  1,  5, 0xF61E2562 );
-    P( D, A, B, C,  6,  9, 0xC040B340 );
-    P( C, D, A, B, 11, 14, 0x265E5A51 );
-    P( B, C, D, A,  0, 20, 0xE9B6C7AA );
-    P( A, B, C, D,  5,  5, 0xD62F105D );
-    P( D, A, B, C, 10,  9, 0x02441453 );
-    P( C, D, A, B, 15, 14, 0xD8A1E681 );
-    P( B, C, D, A,  4, 20, 0xE7D3FBC8 );
-    P( A, B, C, D,  9,  5, 0x21E1CDE6 );
-    P( D, A, B, C, 14,  9, 0xC33707D6 );
-    P( C, D, A, B,  3, 14, 0xF4D50D87 );
-    P( B, C, D, A,  8, 20, 0x455A14ED );
-    P( A, B, C, D, 13,  5, 0xA9E3E905 );
-    P( D, A, B, C,  2,  9, 0xFCEFA3F8 );
-    P( C, D, A, B,  7, 14, 0x676F02D9 );
-    P( B, C, D, A, 12, 20, 0x8D2A4C8A );
-
-#undef F
-    
-#define F(x,y,z) (x ^ y ^ z)
-
-    P( A, B, C, D,  5,  4, 0xFFFA3942 );
-    P( D, A, B, C,  8, 11, 0x8771F681 );
-    P( C, D, A, B, 11, 16, 0x6D9D6122 );
-    P( B, C, D, A, 14, 23, 0xFDE5380C );
-    P( A, B, C, D,  1,  4, 0xA4BEEA44 );
-    P( D, A, B, C,  4, 11, 0x4BDECFA9 );
-    P( C, D, A, B,  7, 16, 0xF6BB4B60 );
-    P( B, C, D, A, 10, 23, 0xBEBFBC70 );
-    P( A, B, C, D, 13,  4, 0x289B7EC6 );
-    P( D, A, B, C,  0, 11, 0xEAA127FA );
-    P( C, D, A, B,  3, 16, 0xD4EF3085 );
-    P( B, C, D, A,  6, 23, 0x04881D05 );
-    P( A, B, C, D,  9,  4, 0xD9D4D039 );
-    P( D, A, B, C, 12, 11, 0xE6DB99E5 );
-    P( C, D, A, B, 15, 16, 0x1FA27CF8 );
-    P( B, C, D, A,  2, 23, 0xC4AC5665 );
-
-#undef F
-
-#define F(x,y,z) (y ^ (x | ~z))
-
-    P( A, B, C, D,  0,  6, 0xF4292244 );
-    P( D, A, B, C,  7, 10, 0x432AFF97 );
-    P( C, D, A, B, 14, 15, 0xAB9423A7 );
-    P( B, C, D, A,  5, 21, 0xFC93A039 );
-    P( A, B, C, D, 12,  6, 0x655B59C3 );
-    P( D, A, B, C,  3, 10, 0x8F0CCC92 );
-    P( C, D, A, B, 10, 15, 0xFFEFF47D );
-    P( B, C, D, A,  1, 21, 0x85845DD1 );
-    P( A, B, C, D,  8,  6, 0x6FA87E4F );
-    P( D, A, B, C, 15, 10, 0xFE2CE6E0 );
-    P( C, D, A, B,  6, 15, 0xA3014314 );
-    P( B, C, D, A, 13, 21, 0x4E0811A1 );
-    P( A, B, C, D,  4,  6, 0xF7537E82 );
-    P( D, A, B, C, 11, 10, 0xBD3AF235 );
-    P( C, D, A, B,  2, 15, 0x2AD7D2BB );
-    P( B, C, D, A,  9, 21, 0xEB86D391 );
-
-#undef F
-
-    ctx->state[0] += A;
-    ctx->state[1] += B;
-    ctx->state[2] += C;
-    ctx->state[3] += D;
-}
-
-/*
- * MD5 process buffer
- */
-void md5_update( md5_context *ctx, const unsigned char *input, size_t ilen )
-{
-    size_t fill;
-    uint32_t left;
-
-    if( ilen <= 0 )
-        return;
-
-    left = ctx->total[0] & 0x3F;
-    fill = 64 - left;
-
-    ctx->total[0] += (uint32_t) ilen;
-    ctx->total[0] &= 0xFFFFFFFF;
-
-    if( ctx->total[0] < (uint32_t) ilen )
-        ctx->total[1]++;
-
-    if( left && ilen >= fill )
-    {
-        memcpy( (void *) (ctx->buffer + left), input, fill );
-        md5_process( ctx, ctx->buffer );
-        input += fill;
-        ilen  -= fill;
-        left = 0;
-    }
-
-    while( ilen >= 64 )
-    {
-        md5_process( ctx, input );
-        input += 64;
-        ilen  -= 64;
-    }
-
-    if( ilen > 0 )
-    {
-        memcpy( (void *) (ctx->buffer + left), input, ilen );
-    }
-}
-
-static const unsigned char md5_padding[64] =
-{
- 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-/*
- * MD5 final digest
- */
-void md5_finish( md5_context *ctx, unsigned char output[16] )
-{
-    uint32_t last, padn;
-    uint32_t high, low;
-    unsigned char msglen[8];
-
-    high = ( ctx->total[0] >> 29 )
-         | ( ctx->total[1] <<  3 );
-    low  = ( ctx->total[0] <<  3 );
-
-    PUT_UINT32_LE( low,  msglen, 0 );
-    PUT_UINT32_LE( high, msglen, 4 );
-
-    last = ctx->total[0] & 0x3F;
-    padn = ( last < 56 ) ? ( 56 - last ) : ( 120 - last );
-
-    md5_update( ctx, md5_padding, padn );
-    md5_update( ctx, msglen, 8 );
-
-    PUT_UINT32_LE( ctx->state[0], output,  0 );
-    PUT_UINT32_LE( ctx->state[1], output,  4 );
-    PUT_UINT32_LE( ctx->state[2], output,  8 );
-    PUT_UINT32_LE( ctx->state[3], output, 12 );
-}
-
-#endif /* !POLARSSL_MD5_ALT */
-
-/*
- * output = MD5( input buffer )
- */
-void md5( const unsigned char *input, size_t ilen, unsigned char output[16] )
-{
-    md5_context ctx;
-
-    md5_starts( &ctx );
-    md5_update( &ctx, input, ilen );
-    md5_finish( &ctx, output );
-
-    memset( &ctx, 0, sizeof( md5_context ) );
-}
-
-#if defined(POLARSSL_FS_IO)
-/*
- * output = MD5( file contents )
- */
-int md5_file( const char *path, unsigned char output[16] )
-{
-    FILE *f;
-    size_t n;
-    md5_context ctx;
-    unsigned char buf[1024];
-
-    if( ( f = fopen( path, "rb" ) ) == NULL )
-        return( POLARSSL_ERR_MD5_FILE_IO_ERROR );
-
-    md5_starts( &ctx );
-
-    while( ( n = fread( buf, 1, sizeof( buf ), f ) ) > 0 )
-        md5_update( &ctx, buf, n );
-
-    md5_finish( &ctx, output );
-
-    memset( &ctx, 0, sizeof( md5_context ) );
-
-    if( ferror( f ) != 0 )
-    {
-        fclose( f );
-        return( POLARSSL_ERR_MD5_FILE_IO_ERROR );
-    }
-
-    fclose( f );
-    return( 0 );
-}
-#endif /* POLARSSL_FS_IO */
-
-/*
- * MD5 HMAC context setup
- */
-void md5_hmac_starts( md5_context *ctx, const unsigned char *key, size_t keylen )
-{
-    size_t i;
-    unsigned char sum[16];
-
-    if( keylen > 64 )
-    {
-        md5( key, keylen, sum );
-        keylen = 16;
-        key = sum;
-    }
-
-    memset( ctx->ipad, 0x36, 64 );
-    memset( ctx->opad, 0x5C, 64 );
-
-    for( i = 0; i < keylen; i++ )
-    {
-        ctx->ipad[i] = (unsigned char)( ctx->ipad[i] ^ key[i] );
-        ctx->opad[i] = (unsigned char)( ctx->opad[i] ^ key[i] );
-    }
-
-    md5_starts( ctx );
-    md5_update( ctx, ctx->ipad, 64 );
-
-    memset( sum, 0, sizeof( sum ) );
-}
-
-/*
- * MD5 HMAC process buffer
- */
-void md5_hmac_update( md5_context *ctx, const unsigned char *input, size_t ilen )
-{
-    md5_update( ctx, input, ilen );
-}
-
-/*
- * MD5 HMAC final digest
- */
-void md5_hmac_finish( md5_context *ctx, unsigned char output[16] )
-{
-    unsigned char tmpbuf[16];
-
-    md5_finish( ctx, tmpbuf );
-    md5_starts( ctx );
-    md5_update( ctx, ctx->opad, 64 );
-    md5_update( ctx, tmpbuf, 16 );
-    md5_finish( ctx, output );
-
-    memset( tmpbuf, 0, sizeof( tmpbuf ) );
-}
-
-/*
- * MD5 HMAC context reset
- */
-void md5_hmac_reset( md5_context *ctx )
-{
-    md5_starts( ctx );
-    md5_update( ctx, ctx->ipad, 64 );
-}
-
-/*
- * output = HMAC-MD5( hmac key, input buffer )
- */
-void md5_hmac( const unsigned char *key, size_t keylen,
-               const unsigned char *input, size_t ilen,
-               unsigned char output[16] )
-{
-    md5_context ctx;
-
-    md5_hmac_starts( &ctx, key, keylen );
-    md5_hmac_update( &ctx, input, ilen );
-    md5_hmac_finish( &ctx, output );
-
-    memset( &ctx, 0, sizeof( md5_context ) );
-}
-
-#if defined(POLARSSL_SELF_TEST)
-/*
- * RFC 1321 test vectors
- */
-static unsigned char md5_test_buf[7][81] =
-{
-    { "" }, 
-    { "a" },
-    { "abc" },
-    { "message digest" },
-    { "abcdefghijklmnopqrstuvwxyz" },
-    { "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" },
-    { "12345678901234567890123456789012345678901234567890123456789012" \
-      "345678901234567890" }
-};
-
-static const int md5_test_buflen[7] =
-{
-    0, 1, 3, 14, 26, 62, 80
-};
-
-static const unsigned char md5_test_sum[7][16] =
-{
-    { 0xD4, 0x1D, 0x8C, 0xD9, 0x8F, 0x00, 0xB2, 0x04,
-      0xE9, 0x80, 0x09, 0x98, 0xEC, 0xF8, 0x42, 0x7E },
-    { 0x0C, 0xC1, 0x75, 0xB9, 0xC0, 0xF1, 0xB6, 0xA8,
-      0x31, 0xC3, 0x99, 0xE2, 0x69, 0x77, 0x26, 0x61 },
-    { 0x90, 0x01, 0x50, 0x98, 0x3C, 0xD2, 0x4F, 0xB0,
-      0xD6, 0x96, 0x3F, 0x7D, 0x28, 0xE1, 0x7F, 0x72 },
-    { 0xF9, 0x6B, 0x69, 0x7D, 0x7C, 0xB7, 0x93, 0x8D,
-      0x52, 0x5A, 0x2F, 0x31, 0xAA, 0xF1, 0x61, 0xD0 },
-    { 0xC3, 0xFC, 0xD3, 0xD7, 0x61, 0x92, 0xE4, 0x00,
-      0x7D, 0xFB, 0x49, 0x6C, 0xCA, 0x67, 0xE1, 0x3B },
-    { 0xD1, 0x74, 0xAB, 0x98, 0xD2, 0x77, 0xD9, 0xF5,
-      0xA5, 0x61, 0x1C, 0x2C, 0x9F, 0x41, 0x9D, 0x9F },
-    { 0x57, 0xED, 0xF4, 0xA2, 0x2B, 0xE3, 0xC9, 0x55,
-      0xAC, 0x49, 0xDA, 0x2E, 0x21, 0x07, 0xB6, 0x7A }
-};
-
-/*
- * RFC 2202 test vectors
- */
-static unsigned char md5_hmac_test_key[7][26] =
-{
-    { "\x0B\x0B\x0B\x0B\x0B\x0B\x0B\x0B\x0B\x0B\x0B\x0B\x0B\x0B\x0B\x0B" },
-    { "Jefe" },
-    { "\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA\xAA" },
-    { "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10"
-      "\x11\x12\x13\x14\x15\x16\x17\x18\x19" },
-    { "\x0C\x0C\x0C\x0C\x0C\x0C\x0C\x0C\x0C\x0C\x0C\x0C\x0C\x0C\x0C\x0C" },
-    { "" }, /* 0xAA 80 times */
-    { "" }
-};
-
-static const int md5_hmac_test_keylen[7] =
-{
-    16, 4, 16, 25, 16, 80, 80
-};
-
-static unsigned char md5_hmac_test_buf[7][74] =
-{
-    { "Hi There" },
-    { "what do ya want for nothing?" },
-    { "\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD"
-      "\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD"
-      "\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD"
-      "\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD"
-      "\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD\xDD" },
-    { "\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD"
-      "\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD"
-      "\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD"
-      "\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD"
-      "\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD" },
-    { "Test With Truncation" },
-    { "Test Using Larger Than Block-Size Key - Hash Key First" },
-    { "Test Using Larger Than Block-Size Key and Larger"
-      " Than One Block-Size Data" }
-};
-
-static const int md5_hmac_test_buflen[7] =
-{
-    8, 28, 50, 50, 20, 54, 73
-};
-
-static const unsigned char md5_hmac_test_sum[7][16] =
-{
-    { 0x92, 0x94, 0x72, 0x7A, 0x36, 0x38, 0xBB, 0x1C,
-      0x13, 0xF4, 0x8E, 0xF8, 0x15, 0x8B, 0xFC, 0x9D },
-    { 0x75, 0x0C, 0x78, 0x3E, 0x6A, 0xB0, 0xB5, 0x03,
-      0xEA, 0xA8, 0x6E, 0x31, 0x0A, 0x5D, 0xB7, 0x38 },
-    { 0x56, 0xBE, 0x34, 0x52, 0x1D, 0x14, 0x4C, 0x88,
-      0xDB, 0xB8, 0xC7, 0x33, 0xF0, 0xE8, 0xB3, 0xF6 },
-    { 0x69, 0x7E, 0xAF, 0x0A, 0xCA, 0x3A, 0x3A, 0xEA,
-      0x3A, 0x75, 0x16, 0x47, 0x46, 0xFF, 0xAA, 0x79 },
-    { 0x56, 0x46, 0x1E, 0xF2, 0x34, 0x2E, 0xDC, 0x00,
-      0xF9, 0xBA, 0xB9, 0x95 },
-    { 0x6B, 0x1A, 0xB7, 0xFE, 0x4B, 0xD7, 0xBF, 0x8F,
-      0x0B, 0x62, 0xE6, 0xCE, 0x61, 0xB9, 0xD0, 0xCD },
-    { 0x6F, 0x63, 0x0F, 0xAD, 0x67, 0xCD, 0xA0, 0xEE,
-      0x1F, 0xB1, 0xF5, 0x62, 0xDB, 0x3A, 0xA5, 0x3E }
-};
-
-/*
- * Checkup routine
- */
-int md5_self_test( int verbose )
-{
-    int i, buflen;
-    unsigned char buf[1024];
-    unsigned char md5sum[16];
-    md5_context ctx;
-
-    for( i = 0; i < 7; i++ )
-    {
-        if( verbose != 0 )
-            polarssl_printf( "  MD5 test #%d: ", i + 1 );
-
-        md5( md5_test_buf[i], md5_test_buflen[i], md5sum );
-
-        if( memcmp( md5sum, md5_test_sum[i], 16 ) != 0 )
-        {
-            if( verbose != 0 )
-                polarssl_printf( "failed\n" );
-
-            return( 1 );
-        }
-
-        if( verbose != 0 )
-            polarssl_printf( "passed\n" );
-    }
-
-    if( verbose != 0 )
-        polarssl_printf( "\n" );
-
-    for( i = 0; i < 7; i++ )
-    {
-        if( verbose != 0 )
-            polarssl_printf( "  HMAC-MD5 test #%d: ", i + 1 );
-
-        if( i == 5 || i == 6 )
-        {
-            memset( buf, '\xAA', buflen = 80 );
-            md5_hmac_starts( &ctx, buf, buflen );
-        }
-        else
-            md5_hmac_starts( &ctx, md5_hmac_test_key[i],
-                                   md5_hmac_test_keylen[i] );
-
-        md5_hmac_update( &ctx, md5_hmac_test_buf[i],
-                               md5_hmac_test_buflen[i] );
-
-        md5_hmac_finish( &ctx, md5sum );
-
-        buflen = ( i == 4 ) ? 12 : 16;
-
-        if( memcmp( md5sum, md5_hmac_test_sum[i], buflen ) != 0 )
-        {
-            if( verbose != 0 )
-                polarssl_printf( "failed\n" );
-
-            return( 1 );
-        }
-
-        if( verbose != 0 )
-            polarssl_printf( "passed\n" );
-    }
-
-    if( verbose != 0 )
-        polarssl_printf( "\n" );
-
-    return( 0 );
-}
-
+#if BYTE_ORDER <= 0		/* little-endian */
+	{
+	    /*
+	     * On little-endian machines, we can process properly aligned
+	     * data without copying it.
+	     */
+	    if (!((data - (const md5_byte_t *)0) & 3)) {
+		/* data are properly aligned */
+		X = (const md5_word_t *)data;
+	    } else {
+		/* not aligned */
+		memcpy(xbuf, data, 64);
+		X = xbuf;
+	    }
+	}
 #endif
-
+#if BYTE_ORDER == 0
+	else			/* dynamic big-endian */
 #endif
+#if BYTE_ORDER >= 0		/* big-endian */
+	{
+	    /*
+	     * On big-endian machines, we must arrange the bytes in the
+	     * right order.
+	     */
+	    const md5_byte_t *xp = data;
+	    int i;
+
+#  if BYTE_ORDER == 0
+	    X = xbuf;		/* (dynamic only) */
+#  else
+#    define xbuf X		/* (static only) */
+#  endif
+	    for (i = 0; i < 16; ++i, xp += 4)
+		xbuf[i] = xp[0] + (xp[1] << 8) + (xp[2] << 16) + (xp[3] << 24);
+	}
+#endif
+    }
+
+#define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
+
+    /* Round 1. */
+    /* Let [abcd k s i] denote the operation
+       a = b + ((a + F(b,c,d) + X[k] + T[i]) <<< s). */
+#define F(x, y, z) (((x) & (y)) | (~(x) & (z)))
+#define SET(a, b, c, d, k, s, Ti)\
+  t = a + F(b,c,d) + X[k] + Ti;\
+  a = ROTATE_LEFT(t, s) + b
+    /* Do the following 16 operations. */
+    SET(a, b, c, d,  0,  7,  T1);
+    SET(d, a, b, c,  1, 12,  T2);
+    SET(c, d, a, b,  2, 17,  T3);
+    SET(b, c, d, a,  3, 22,  T4);
+    SET(a, b, c, d,  4,  7,  T5);
+    SET(d, a, b, c,  5, 12,  T6);
+    SET(c, d, a, b,  6, 17,  T7);
+    SET(b, c, d, a,  7, 22,  T8);
+    SET(a, b, c, d,  8,  7,  T9);
+    SET(d, a, b, c,  9, 12, T10);
+    SET(c, d, a, b, 10, 17, T11);
+    SET(b, c, d, a, 11, 22, T12);
+    SET(a, b, c, d, 12,  7, T13);
+    SET(d, a, b, c, 13, 12, T14);
+    SET(c, d, a, b, 14, 17, T15);
+    SET(b, c, d, a, 15, 22, T16);
+#undef SET
+
+     /* Round 2. */
+     /* Let [abcd k s i] denote the operation
+          a = b + ((a + G(b,c,d) + X[k] + T[i]) <<< s). */
+#define G(x, y, z) (((x) & (z)) | ((y) & ~(z)))
+#define SET(a, b, c, d, k, s, Ti)\
+  t = a + G(b,c,d) + X[k] + Ti;\
+  a = ROTATE_LEFT(t, s) + b
+     /* Do the following 16 operations. */
+    SET(a, b, c, d,  1,  5, T17);
+    SET(d, a, b, c,  6,  9, T18);
+    SET(c, d, a, b, 11, 14, T19);
+    SET(b, c, d, a,  0, 20, T20);
+    SET(a, b, c, d,  5,  5, T21);
+    SET(d, a, b, c, 10,  9, T22);
+    SET(c, d, a, b, 15, 14, T23);
+    SET(b, c, d, a,  4, 20, T24);
+    SET(a, b, c, d,  9,  5, T25);
+    SET(d, a, b, c, 14,  9, T26);
+    SET(c, d, a, b,  3, 14, T27);
+    SET(b, c, d, a,  8, 20, T28);
+    SET(a, b, c, d, 13,  5, T29);
+    SET(d, a, b, c,  2,  9, T30);
+    SET(c, d, a, b,  7, 14, T31);
+    SET(b, c, d, a, 12, 20, T32);
+#undef SET
+
+     /* Round 3. */
+     /* Let [abcd k s t] denote the operation
+          a = b + ((a + H(b,c,d) + X[k] + T[i]) <<< s). */
+#define H(x, y, z) ((x) ^ (y) ^ (z))
+#define SET(a, b, c, d, k, s, Ti)\
+  t = a + H(b,c,d) + X[k] + Ti;\
+  a = ROTATE_LEFT(t, s) + b
+     /* Do the following 16 operations. */
+    SET(a, b, c, d,  5,  4, T33);
+    SET(d, a, b, c,  8, 11, T34);
+    SET(c, d, a, b, 11, 16, T35);
+    SET(b, c, d, a, 14, 23, T36);
+    SET(a, b, c, d,  1,  4, T37);
+    SET(d, a, b, c,  4, 11, T38);
+    SET(c, d, a, b,  7, 16, T39);
+    SET(b, c, d, a, 10, 23, T40);
+    SET(a, b, c, d, 13,  4, T41);
+    SET(d, a, b, c,  0, 11, T42);
+    SET(c, d, a, b,  3, 16, T43);
+    SET(b, c, d, a,  6, 23, T44);
+    SET(a, b, c, d,  9,  4, T45);
+    SET(d, a, b, c, 12, 11, T46);
+    SET(c, d, a, b, 15, 16, T47);
+    SET(b, c, d, a,  2, 23, T48);
+#undef SET
+
+     /* Round 4. */
+     /* Let [abcd k s t] denote the operation
+          a = b + ((a + I(b,c,d) + X[k] + T[i]) <<< s). */
+#define I(x, y, z) ((y) ^ ((x) | ~(z)))
+#define SET(a, b, c, d, k, s, Ti)\
+  t = a + I(b,c,d) + X[k] + Ti;\
+  a = ROTATE_LEFT(t, s) + b
+     /* Do the following 16 operations. */
+    SET(a, b, c, d,  0,  6, T49);
+    SET(d, a, b, c,  7, 10, T50);
+    SET(c, d, a, b, 14, 15, T51);
+    SET(b, c, d, a,  5, 21, T52);
+    SET(a, b, c, d, 12,  6, T53);
+    SET(d, a, b, c,  3, 10, T54);
+    SET(c, d, a, b, 10, 15, T55);
+    SET(b, c, d, a,  1, 21, T56);
+    SET(a, b, c, d,  8,  6, T57);
+    SET(d, a, b, c, 15, 10, T58);
+    SET(c, d, a, b,  6, 15, T59);
+    SET(b, c, d, a, 13, 21, T60);
+    SET(a, b, c, d,  4,  6, T61);
+    SET(d, a, b, c, 11, 10, T62);
+    SET(c, d, a, b,  2, 15, T63);
+    SET(b, c, d, a,  9, 21, T64);
+#undef SET
+
+     /* Then perform the following additions. (That is increment each
+        of the four registers by the value it had before this block
+        was started.) */
+    pms->abcd[0] += a;
+    pms->abcd[1] += b;
+    pms->abcd[2] += c;
+    pms->abcd[3] += d;
+}
+
+void
+md5_init(md5_state_t *pms)
+{
+    pms->count[0] = pms->count[1] = 0;
+    pms->abcd[0] = 0x67452301;
+    pms->abcd[1] = /*0xefcdab89*/ T_MASK ^ 0x10325476;
+    pms->abcd[2] = /*0x98badcfe*/ T_MASK ^ 0x67452301;
+    pms->abcd[3] = 0x10325476;
+}
+
+void
+md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes)
+{
+    const md5_byte_t *p = data;
+    int left = nbytes;
+    int offset = (pms->count[0] >> 3) & 63;
+    md5_word_t nbits = (md5_word_t)(nbytes << 3);
+
+    if (nbytes <= 0)
+	return;
+
+    /* Update the message length. */
+    pms->count[1] += nbytes >> 29;
+    pms->count[0] += nbits;
+    if (pms->count[0] < nbits)
+	pms->count[1]++;
+
+    /* Process an initial partial block. */
+    if (offset) {
+	int copy = (offset + nbytes > 64 ? 64 - offset : nbytes);
+
+	memcpy(pms->buf + offset, p, copy);
+	if (offset + copy < 64)
+	    return;
+	p += copy;
+	left -= copy;
+	md5_process(pms, pms->buf);
+    }
+
+    /* Process full blocks. */
+    for (; left >= 64; p += 64, left -= 64)
+	md5_process(pms, p);
+
+    /* Process a final partial block. */
+    if (left)
+	memcpy(pms->buf, p, left);
+}
+
+void
+md5_finish(md5_state_t *pms, md5_byte_t digest[16])
+{
+    static const md5_byte_t pad[64] = {
+	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
+    md5_byte_t data[8];
+    int i;
+
+    /* Save the length before padding. */
+    for (i = 0; i < 8; ++i)
+	data[i] = (md5_byte_t)(pms->count[i >> 2] >> ((i & 3) << 3));
+    /* Pad to 56 bytes mod 64. */
+    md5_append(pms, pad, ((55 - (pms->count[0] >> 3)) & 63) + 1);
+    /* Append the length. */
+    md5_append(pms, data, 8);
+    for (i = 0; i < 16; ++i)
+	digest[i] = (md5_byte_t)(pms->abcd[i >> 2] >> ((i & 3) << 3));
+}
+
+unsigned char *
+MD5(const unsigned char *d, int n, unsigned char *md)
+{
+	md5_state_t state;
+	md5_byte_t digest[16];
+
+	md5_init(&state);
+	md5_append(&state, d, n);
+	md5_finish(&state, digest);
+
+	memcpy(md, digest, 16);
+
+	return md;
+}
+
