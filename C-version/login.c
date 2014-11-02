@@ -32,8 +32,6 @@ struct login_packet
 
 };
 
-
-
 struct login_packet *login_verifier(struct login_packet *pkt)
 {
     return pkt;
