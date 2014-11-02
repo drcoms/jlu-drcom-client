@@ -1,20 +1,20 @@
 ---------------
 ### Simple JLU drcom client dirty hack C-version
 
-ĞèÒªĞŞ¸Ä drcom.c ÎÄ¼şÖĞ user(ÕÊºÅ), pass(ÃÜÂë), mac(MAC µØÖ·, 0x010203040506 ¸ñÊ½) µÈ²ÎÊı£¬»ñÈ¡ MAC µØÖ·
+éœ€è¦ä¿®æ”¹ drcom.c æ–‡ä»¶ä¸­ user(å¸å·), pass(å¯†ç ), mac(MAC åœ°å€, 0x010203040506 æ ¼å¼) ç­‰å‚æ•°ï¼Œè·å– MAC åœ°å€
 	
 	echo 0x`ifconfig eth | egrep -io "([0-9a-f]{2}:){5}[0-9a-f]{2}" | tr -d ":"`
 	
-±àÒë
+ç¼–è¯‘
 	
 	gcc drcom.c md5.c -o drcom
 	
 
-Ö±½ÓÔÚÖÕ¶ËÔËĞĞ ./drcom 
+ç›´æ¥åœ¨ç»ˆç«¯è¿è¡Œ ./drcom 
 
-haha, dirty hack ¾ÍÊÇË¬ (£ş¡¦£ş)¡¡
+haha, dirty hack å°±æ˜¯çˆ½ (ï¿£Ë‡ï¿£)ã€€
 
-¸ÄÎªÒÔ daemon ·½Ê½ÔËĞĞ£¬È¥µô long ÀàĞÍ£¬Ö§³Ö 32 Î»ÏµÍ³
+æ”¹ä¸ºä»¥ daemon æ–¹å¼è¿è¡Œï¼Œå»æ‰ long ç±»å‹ï¼Œæ”¯æŒ 32 ä½ç³»ç»Ÿ
 
 TODO: logout
 
