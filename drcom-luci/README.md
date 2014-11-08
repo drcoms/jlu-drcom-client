@@ -1,7 +1,28 @@
 DrCOM GUI for luci
 ---------------------
-ÓÉÓÚ¸÷ÖÖ°æ±¾Çé¿ö²»Ò»Ñù£¬ĞèÒª×ÔĞĞÕûºÏ
+ç”±äºå„ç§ç‰ˆæœ¬æƒ…å†µä¸ä¸€æ ·ï¼Œéœ€è¦è‡ªè¡Œæ•´åˆ
 
-ÔÚµÚÒ»´Î±£´æÁËÅäÖÃÒÔºóÊÔÊÔ `uci show drcom.config`
+åœ¨ç¬¬ä¸€æ¬¡ä¿å­˜äº†é…ç½®ä»¥åè¯•è¯• `uci show drcom.config`
 
-¿ÉÒÔÊ¹ÓÃ `uci get drcom.config.username` ÕâÑùµÄÓï¾äÀ´»ñÈ¡ *luci* µÄÊı¾İ
+å¯ä»¥ä½¿ç”¨ `uci get drcom.config.username` è¿™æ ·çš„è¯­å¥æ¥è·å– *luci* çš„æ•°æ®
+
+ä½¿ç”¨
+-----------
+å¯¹ `wired.py` çš„ä¿®æ”¹:
+
+1. åå­—ä¿®æ”¹ä¸º `drcom`
+2. åœ¨å¤´éƒ¨åŠ å…¥ `#!/usr/bin/python`
+3. åœ¨ç¬¬ä¸€ä¸ª `import` è¯­å¥ååŠ å…¥ `import subprocess`
+4. åŠ å…¥å‡½æ•°
+
+  ```python
+  def init():
+      global username, password, mac, host_name, host_os, server
+      username = subprocess.check_output(['uci','get','drcom.config.username']).strip()
+      password = subprocess.check_output(['uci','get','drcom.config.password']).strip()
+      mac = int(subprocess.check_output(['uci','get','drcom.config.mac']).strip().replace(':', ''), base=16)
+      host_name = subprocess.check_output(['uci','get','drcom.config.host_name']).strip()
+      host_os = subprocess.check_output(['uci','get','drcom.config.host_os']).strip()
+      server = subprocess.check_output(['uci','get','drcom.config.remote_server']).strip()
+  ```
+5. `execfile(CONF, globals())` æ›¿æ¢ä¸º `init()`
