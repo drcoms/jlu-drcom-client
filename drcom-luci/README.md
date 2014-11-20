@@ -26,3 +26,4 @@ DrCOM GUI for luci
       server = subprocess.check_output(['uci','get','drcom.config.remote_server']).strip()
   ```
 5. `execfile(CONF, globals())` 替换为 `init()`
+6. 在 `/etc/config/` 中建立文件 `drcom`
