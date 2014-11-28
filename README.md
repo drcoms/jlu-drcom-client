@@ -1,5 +1,6 @@
 DrCOM Client for jilin university
 -------------
+*如果你愿意捐助作者这个穷屌, 支付宝: latyas@live.com*
 
 有关其他学校
 -------------
