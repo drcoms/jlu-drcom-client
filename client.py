@@ -220,7 +220,7 @@ def login(usr, pwd, svr):
               print "[login] wrong password."
               i = i + 1
               time.sleep(i*1.618)
-            elif data[0] != '\x02':
+            elif data[0] != '\x04':
               print "[login] server return exception.retry"
               if DEBUG:
                 print '[login] last packet server returned:\n' + data.encode('hex')
