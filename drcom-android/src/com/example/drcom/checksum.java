@@ -9,7 +9,7 @@ public class checksum {
 		for(int j=0;j<check.length;j=j+4){
 			int i_foo = 0;
             for(int i=0;i<4;i++){
-				
+				if(4*j_foo-1-i_foo>check.length){break;}
 				check_foo[i] = check[4*j_foo-1-i_foo];
 				++i_foo;
 			}
