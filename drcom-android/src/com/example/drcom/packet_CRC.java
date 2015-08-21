@@ -9,7 +9,7 @@ public class packet_CRC {
 			
 			int i_foo = 0;
 			for(int i=0;i<2;i++){
-				
+				if(2*j_foo-1-i_foo>check.length){break;}
 				check_foo[i] = check[2*j_foo-1-i_foo];
 				++i_foo;
 			}
