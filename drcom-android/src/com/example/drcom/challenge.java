@@ -7,7 +7,7 @@ import java.util.Random;
 
 public class challenge {
     
-	public static byte[] dr_challenge(String svr) throws Exception{
+	public static byte[] dr_challenge(String svr, boolean flag) throws Exception{
 			DatagramSocket client = new DatagramSocket();
 			InetAddress addr = InetAddress.getByName(svr);
 			Random random = new Random();
@@ -16,6 +16,10 @@ public class challenge {
 					0x00, 0x00, 0x00, 0x00, 0x00, 
 					0x00, 0x00, 0x00, 0x00, 0x00, 
 					0x00, 0x00, 0x00, 0x00, 0x00};
+			if(flag==false){
+				foo[1] = 0x03;
+				foo[3] = 0x6e;
+			}
 			DatagramPacket sendPacket = new DatagramPacket(foo, foo.length, addr, 61440);
 			client.send(sendPacket);
 			
