@@ -4,10 +4,13 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import android.content.Context;
+import android.widget.Toast;
+
 public class logout {
-	public static void dr_logout(String usr, String ipaddr, String pwd, String svr, String mac) throws Exception{
+	public static void dr_logout(String usr, String ipaddr, String pwd, String svr, String mac, byte[] authinfo, Context context) throws Exception{
 		byte[] salt = challenge.dr_challenge(svr, false);
-		byte[] packet = mkopkt.dr_mkopkt(salt, ipaddr, usr, pwd, mac);
+		byte[] packet = mkopkt.dr_mkopkt(salt, ipaddr, usr, pwd, mac, authinfo);
 		
 		DatagramSocket client = new DatagramSocket();
 		InetAddress addr = InetAddress.getByName(svr);
@@ -19,9 +22,9 @@ public class logout {
 		client.receive(re_packet);
 		
 		if(receive[0]==0x04){
-			System.out.println(receive[0]);
+			Toast.makeText(context, "注销成功", Toast.LENGTH_SHORT).show();  
 		}else{
-			System.out.println(receive[0]);
+			Toast.makeText(context, "注销失败", Toast.LENGTH_SHORT).show();  
 		}
 	}
 }
