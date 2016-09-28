@@ -1,5 +1,7 @@
 DrCOM Client for jilin university
 -------------
+由于吉大不走特色drcom路线了，可移步到 https://github.com/drcoms/drcom-generic/blob/master/latest-wired.py 用这个通用的版本，并把`ror_version`改成`True`，并参考wiki中的使用说明。也可以使用 `newclient.py`或者`latest_521d.py`
+-------------
 
 2016.9 5.2.1d 新版 `newclient.py`  感谢 @zhjc1124 提供<br>
 `latest_521d.py`是参考newclient.py修改后的，使用方式参考https://github.com/drcoms/drcom-generic/wiki/d版简略使用和配置说明
