@@ -1,9 +1,6 @@
 DrCOM Client for jilin university
 -------------
-新版客户端请直接使用 `newclient.py`
-
--------------
-2016.9 5.2.1d 新版 `newclient.py`  感谢 @zhjc1124 提供
+新版客户端请直接使用 `newclient.py` ，感谢 @zhjc1124 提供
 -------------
 HITwh的Shindo酱优秀的项目,u62R0（理论上u64也是可以的），带802.1x <br>
 https://github.com/coverxit/EasyDrcom/
