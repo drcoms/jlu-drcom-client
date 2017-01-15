@@ -1,0 +1,36 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %logger{36}:%line [%-5level][${drcom.java.sessionID}] %m%n
+            </pattern>
+        </encoder>
+    </appender>
+    <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${drcom.java.data.home}/logs/drcom.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>${drcom.java.data.home}/logs/drcom-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- 每个文件最多 10MB 保存 10 天 总大小不超过 100MB -->
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>10</maxHistory>
+            <totalSizeCap>100MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %logger{36}:%line [%-5level][${drcom.java.sessionID}] %m%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!--
+        trace bytes detail
+        debug 界面操作记录
+        info  基本没有, production级别
+
+        默认记录级别是 info 可通过 -D 指定日志级别
+        -Dlog.level=trace
+    -->
+    <root level="${log.level:-info}">
+        <!--<appender-ref ref="STDOUT"/>-->
+        <appender-ref ref="ROLLING"/>
+    </root>
+</configuration>
