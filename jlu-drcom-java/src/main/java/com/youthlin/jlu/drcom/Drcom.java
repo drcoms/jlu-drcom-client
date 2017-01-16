@@ -32,19 +32,15 @@ import static com.youthlin.jlu.drcom.util.FxUtil.icon;
 
 //Created by lin on 2017-01-08-008.
 public class Drcom extends Application {
+    private static final Logger log = LoggerFactory.getLogger(Drcom.class);
+    private static AppController appController;
+    private static Stage stage;
+
     static {
         //放在 log 之前初始化//前一次commit被IDEA自动格式化放乱了
         System.setProperty("drcom.java.sessionID", UUID.randomUUID().toString().substring(24));
         System.setProperty("drcom.java.data.home", Constants.DATA_HOME);
     }
-
-    private static final Logger log = LoggerFactory.getLogger(Drcom.class);
-    private static AppController appController;
-    static {
-        //放在 log 之前初始化//前一次commit被IDEA自动格式化放乱了
-        System.setProperty("drcom.java.sessionID", UUID.randomUUID().toString().substring(24));
-        System.setProperty("drcom.java.data.home", Constants.DATA_HOME);
-    }    private static Stage stage;
 
     private TrayIcon trayIcon;
 
