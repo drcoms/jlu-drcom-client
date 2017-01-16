@@ -27,6 +27,7 @@ import java.net.UnknownHostException;
  */
 public class DrcomTask implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(DrcomTask.class);
+    //region //Drcom 协议若干字段信息
     /**
      * 在 keep38 的回复报文中获得[28:30]
      */
@@ -55,14 +56,6 @@ public class DrcomTask implements Runnable {
      * 初始为 {0，0，0，0} , 在 keep40_1 的回复报文更新[16:20]
      */
     private final byte[] tail2 = new byte[4];
-    //region //Drcom 协议若干字段信息
-    private AppController appController;
-    private boolean notifyLogout = false;
-    private DatagramSocket client;
-    private InetAddress serverAddress;
-    private String username;
-    private String password;
-    private HostInfo hostInfo;
     /**
      * 在 keep alive 中计数.
      * 初始在 keep40_extra : 0x00, 之后每次 keep40 都加一
@@ -70,6 +63,15 @@ public class DrcomTask implements Runnable {
     private int count = 0;
     private int keep38Count = 0;//仅用于日志计数
     //endregion
+
+    private AppController appController;
+    private boolean notifyLogout = false;
+    private DatagramSocket client;
+    private InetAddress serverAddress;
+    private String username;
+    private String password;
+    private HostInfo hostInfo;
+
 
     public DrcomTask(AppController appController) {
         this.appController = appController;
@@ -270,7 +272,7 @@ public class DrcomTask implements Runnable {
         data[99] = 0x07;
         data[100] = 0x0b;
         byte[] tmp = new byte[101];
-        System.arraycopy(data, 0, tmp, 0, tmp.length);//前 97 位 和 0x140x000x070x0b
+        System.arraycopy(data, 0, tmp, 0, tmp.length);//前 97 位 和 0x14_00_07_0b
         byte[] md5c = MD5.md5(tmp);
         System.arraycopy(md5c, 0, data, 97, 8);//md5c 97+8=105
 

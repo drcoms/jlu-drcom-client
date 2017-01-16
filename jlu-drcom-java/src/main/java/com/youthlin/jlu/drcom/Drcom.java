@@ -37,7 +37,7 @@ public class Drcom extends Application {
     private static Stage stage;
 
     static {
-        //放在 log 之前初始化
+        //放在 log 之前初始化//前一次commit被IDEA自动格式化放乱了
         System.setProperty("drcom.java.sessionID", UUID.randomUUID().toString().substring(24));
         System.setProperty("drcom.java.data.home", Constants.DATA_HOME);
     }

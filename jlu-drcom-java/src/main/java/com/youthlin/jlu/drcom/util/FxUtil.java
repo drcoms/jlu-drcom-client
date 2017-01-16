@@ -33,6 +33,9 @@ public class FxUtil {
         Platform.runLater(alert::show);
     }
 
+    /**
+     * buildAlert 需要在 Fx 线程中调用
+     */
     public static Alert buildAlert(Exception ex) {
         // http://code.makery.ch/blog/javafx-dialogs-official/
         Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage());
@@ -59,6 +62,9 @@ public class FxUtil {
         return alert;
     }
 
+    /**
+     * buildAlert 需要在 Fx 线程中调用
+     */
     public static Alert buildAlert(String info) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, info);
         ((Stage) alert.getDialogPane().getScene().getWindow()).getIcons().add(icon);

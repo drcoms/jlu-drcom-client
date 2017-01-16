@@ -67,17 +67,9 @@ public class ByteUtil {
     public static byte[] ror(byte[] md5a, byte[] password) {
         int len = password.length;
         byte[] ret = new byte[len];
-        int x, y;
+        int x;
         for (int i = 0; i < len; i++) {
-            x = md5a[i];
-            y = password[i];
-            while (x < 0) {
-                x += 256;
-            }
-            while (y < 0) {
-                y += 256;
-            }
-            x = x ^ y;
+            x = toInt(md5a[i]) ^ toInt(password[i]);
             //e.g. x =   0xff      1111_1111
             // x<<3  = 0x07f8 0111_1111_1000
             // x>>>5 = 0x0007           0111

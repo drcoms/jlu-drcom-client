@@ -42,7 +42,7 @@ public class Browser {
         stage.sizeToScene();
 
         urlBar.setOnKeyReleased(event -> {
-            if (event.getCode().equals(KeyCode.ENTER)) {
+            if (event.getCode().equals(KeyCode.ENTER)) {//彩蛋: URL输入栏回车则加载新网址
                 String newUrl = urlBar.getText().trim();
                 if (!newUrl.startsWith("http") && !newUrl.startsWith("file:")) {
                     newUrl = "http://" + newUrl;
@@ -53,13 +53,13 @@ public class Browser {
         });
         webView.setOnKeyReleased(event -> {
             if (event.isControlDown() && KeyCode.L.equals(event.getCode())) {
-                urlBar.requestFocus();
+                urlBar.requestFocus();//仿浏览器 CTRL+L 定位到地址栏
             }
         });
         pane.setOnKeyReleased(event -> {
             KeyCode code = event.getCode();
             if (event.isControlDown() && (KeyCode.W.equals(code)) || KeyCode.Q.equals(code)) {
-                stage.hide();
+                stage.hide();//CTRL+W 或 CTRL+Q 关闭
             }
         });
     }
