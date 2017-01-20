@@ -20,6 +20,10 @@ public class Constants {
 
     public static final String ARTICLE_URL = "http://youthlin.com/?p=1391";
     public static final String PROJECT_HOME = "https://github.com/YouthLin/jlu-drcom-client/tree/master/jlu-drcom-java";
+    public static final String NOTICE_URL = "http://login.jlu.edu.cn/notice.php";
+    public static final double NOTICE_W = 592;
+    public static final double NOTICE_H = 450;
+
 
     public static final String DATA_HOME = System.getProperty("user.home", ".") + File.separator + ".drcom";
     public static final String CONF_HOME = DATA_HOME + File.separator + "conf";

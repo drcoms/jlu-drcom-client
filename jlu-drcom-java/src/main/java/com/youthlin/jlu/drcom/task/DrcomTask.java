@@ -102,7 +102,7 @@ public class DrcomTask implements Runnable {
             if (Drcom.getStage() != null) {
                 Platform.runLater(() -> Drcom.getStage().hide());//登录后隐藏窗口，弹出通知
             }
-            FxUtil.showWebPage("http://login.jlu.edu.cn/notice.php", 592, 450);
+            FxUtil.showWebPage(Constants.NOTICE_URL, Constants.NOTICE_W, Constants.NOTICE_H);
             Platform.runLater(() -> appController.setStatus(STATUS.logged));
 
             //keep alive

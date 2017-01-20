@@ -402,4 +402,7 @@ public class AppController implements Initializable {
         }
     }
 
+    public void onNoticeMenuItemClick(ActionEvent e) {
+        FxUtil.showWebPage(Constants.NOTICE_URL, Constants.NOTICE_W, Constants.NOTICE_H);
+    }
 }

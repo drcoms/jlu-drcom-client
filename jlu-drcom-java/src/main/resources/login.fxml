@@ -23,8 +23,9 @@
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" onKeyReleased="#onKeyReleased" xmlns="http://javafx.com/javafx/8.0.72"
             fx:controller="com.youthlin.jlu.drcom.controller.AppController">
     <top>
-        <MenuBar>
+        <MenuBar useSystemMenuBar="true">
             <Menu fx:id="fileMenu" mnemonicParsing="false" text="文件(F)">
+                <MenuItem onAction="#onNoticeMenuItemClick" text="校园网通知"/>
                 <MenuItem accelerator="CTRL+X" onAction="#onExitMenuItemClick" text="退出"/>
             </Menu>
             <Menu fx:id="helpMenu" mnemonicParsing="false" text="帮助(H)">

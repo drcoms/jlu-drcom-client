@@ -24,7 +24,6 @@ public class Browser {
 
     public Browser(String url, Double width, Double height) {
         urlBar.setText(url);
-        //urlBar.setEditable(false);
         stage.setTitle(Constants.TITLE);
         WebEngine engine = webView.getEngine();
         engine.load(url);
@@ -58,8 +57,19 @@ public class Browser {
         });
         pane.setOnKeyReleased(event -> {
             KeyCode code = event.getCode();
-            if (event.isControlDown() && (KeyCode.W.equals(code)) || KeyCode.Q.equals(code)) {
-                stage.hide();//CTRL+W 或 CTRL+Q 关闭
+            if (event.isControlDown()) {
+                if ((KeyCode.W.equals(code)) || KeyCode.Q.equals(code)) {
+                    stage.hide();//CTRL+W 或 CTRL+Q 关闭
+                } else if (KeyCode.R.equals(code) || KeyCode.F5.equals(code)) {
+                    reload();//CTRL+R CTRL+F5 重新加载
+                }
+            }
+            if (event.isAltDown()) {
+                if (KeyCode.LEFT.equals(code)) {
+                    back();//ALT+LEFT
+                } else if (KeyCode.RIGHT.equals(code)) {
+                    forword();//ALT+RIGHT
+                }
             }
         });
     }
@@ -84,5 +94,17 @@ public class Browser {
 
     public Stage getStage() {
         return stage;
+    }
+
+    public void reload() {
+        webView.getEngine().reload();
+    }
+
+    public void back() {
+        webView.getEngine().executeScript("history.back()");
+    }
+
+    public void forword() {
+        webView.getEngine().executeScript("history.forward()");
     }
 }
