@@ -70,24 +70,8 @@ public class AppController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         log.debug("初始化界面...");
         Drcom.setAppController(this);
-        log.debug("获取网络接口信息...");
-        long start = System.currentTimeMillis();
-        List<HostInfo> nameAndMac = IPUtil.getHostInfo();
-        log.debug("获取网络接口信息完成.[用时:{}ms]", System.currentTimeMillis() - start);
-        macComboBox.getItems().addAll(nameAndMac);
-        if (nameAndMac.size() == 1) {
-            macComboBox.getSelectionModel().select(0);
-        } else {
-            for (HostInfo p : nameAndMac) {
-                if (IPUtil.isPublicIP(p.getAddress4())) {
-                    macComboBox.getSelectionModel().select(p);
-                }
-            }
-        }
         imageView.setImage(loading);
-        log.debug("初始化界面完成.[用时:{}ms]", System.currentTimeMillis() - start);
-        setStatus(STATUS.ready);
-        readConf();
+        setStatus(STATUS.init);
     }
 
     public STATUS getStatus() {
@@ -98,6 +82,12 @@ public class AppController implements Initializable {
         log.debug("Change status to: " + status.name());
         this.status = status;
         switch (status) {
+            case init:
+                imageView.setVisible(true);
+                statusLabel.setText("初始化...");
+                loginButton.setDisable(true);
+                setUIDisable(true);
+                break;
             case ready:
                 imageView.setVisible(false);
                 statusLabel.setText("就绪");
@@ -120,6 +110,44 @@ public class AppController implements Initializable {
                 setUIDisable(true);
                 break;
         }
+    }
+
+    public void init() {
+        readNetWorkInfo();
+    }
+
+    private void readNetWorkInfo() {
+        log.debug("获取网络接口信息...");
+        statusLabel.setText("获取网络接口信息...");
+        long start = System.currentTimeMillis();
+        new Thread(() -> IPUtil.getHostInfo(
+                new IPUtil.OnGetHostInfoCallback() {
+                    @Override
+                    public void update(int current, int total) {
+                        FxUtil.updateLabel(statusLabel, "(" + current + '/' + total + ")获取网络接口信息...");
+                    }
+
+                    @Override
+                    public void done(List<HostInfo> hostInfoList) {
+                        log.debug("获取网络接口信息完成.[用时:{}ms]", System.currentTimeMillis() - start);
+                        Platform.runLater(() -> {
+                            macComboBox.getItems().addAll(hostInfoList);
+                            if (hostInfoList.size() == 1) {
+                                macComboBox.getSelectionModel().select(0);
+                            } else {
+                                for (HostInfo p : hostInfoList) {
+                                    if (IPUtil.isPublicIP(p.getAddress4())) {
+                                        macComboBox.getSelectionModel().select(p);
+                                    }
+                                }
+                            }
+                            log.debug("初始化界面完成.[用时:{}ms]", System.currentTimeMillis() - start);
+                            readConf();
+                        });
+                    }
+                }),
+                "Host Info"
+        ).start();
     }
 
     private void readConf() {
@@ -155,7 +183,6 @@ public class AppController implements Initializable {
                             dashMac, "保存的 MAC 地址");
                     macComboBox.getItems().add(hostInfo);
                     macComboBox.getSelectionModel().select(hostInfo);
-
                 }
                 rememberCheckBox.setSelected(Boolean.valueOf(conf.getProperty(Constants.KEY_REMEMBER, "true")));
                 autoLoginCheckBox.setSelected(Boolean.valueOf(conf.getProperty(Constants.KEY_AUTO_LOGIN, "false")));
@@ -166,9 +193,12 @@ public class AppController implements Initializable {
             } catch (IOException e) {
                 log.debug("读取配置文件时 IO 异常", e);
                 e.printStackTrace();
+            } finally {
+                setStatus(STATUS.ready);
             }
         } else {
             log.debug("配置文件不存在");
+            setStatus(STATUS.ready);
         }
     }
 
@@ -218,6 +248,9 @@ public class AppController implements Initializable {
         String password = passwordField.getText();
         HostInfo hostInfo = macComboBox.getSelectionModel().getSelectedItem();
         String macHexDash = hostInfo.getMacHexDash();
+        if (macHexDash == null) {
+            return;//还在获取网络接口信息时就退出 那就不管配置不配置了
+        }
         log.debug("username = {}, password = {}, mac = {}, remember = {},auto login = {}",
                 username, "*" + password.length() + '*', macHexDash, remember, auto);
         File file = new File(Constants.CONF_HOME, Constants.CONF_FILE_NAME);

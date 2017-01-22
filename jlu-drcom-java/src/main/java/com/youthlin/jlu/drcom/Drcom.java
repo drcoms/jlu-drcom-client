@@ -85,6 +85,7 @@ public class Drcom extends Application {
         Platform.setImplicitExit(false);//仅通过退出按钮或退出菜单退出
         enableTray(stage);//启用托盘
         stage.show();
+        appController.init();
     }
 
     // Java Swing 每次打开只运行一个实例，并激活任务栏里的程序

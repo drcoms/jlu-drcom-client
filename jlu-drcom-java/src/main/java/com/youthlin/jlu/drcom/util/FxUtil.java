@@ -59,13 +59,11 @@ public class FxUtil {
         expContent.add(textArea, 0, 1);
 
         alert.getDialogPane().setExpandableContent(expContent);
-        alert.getDialogPane().expandedProperty().addListener((invalidationListener) -> {
-            Platform.runLater(() -> {
-                alert.getDialogPane().requestLayout();
-                Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-                stage.sizeToScene();
-            });
-        });
+        alert.getDialogPane().expandedProperty().addListener((invalidationListener) -> Platform.runLater(() -> {
+            alert.getDialogPane().requestLayout();
+            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+            stage.sizeToScene();
+        }));
         return alert;
     }
 
@@ -85,5 +83,9 @@ public class FxUtil {
 
     public static void showWebPage(String url, double prefWidth, double prefHeight) {
         Platform.runLater(() -> new Browser(url, prefWidth, prefHeight).show());
+    }
+
+    public static void updateLabel(Label label, String newText) {
+        Platform.runLater(() -> label.setText(newText));
     }
 }
