@@ -59,6 +59,13 @@ public class FxUtil {
         expContent.add(textArea, 0, 1);
 
         alert.getDialogPane().setExpandableContent(expContent);
+        alert.getDialogPane().expandedProperty().addListener((invalidationListener) -> {
+            Platform.runLater(() -> {
+                alert.getDialogPane().requestLayout();
+                Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+                stage.sizeToScene();
+            });
+        });
         return alert;
     }
 
