@@ -41,6 +41,8 @@ public class Drcom extends Application {
     private static final Logger log = LoggerFactory.getLogger(Drcom.class);
     private static AppController appController;
     private static Stage stage;
+    private static long lastKey;
+    private static long thisKey;
     private TrayIcon trayIcon;
 
     public static void main(String[] args) {
@@ -92,8 +94,8 @@ public class Drcom extends Application {
     // http://blog.csdn.net/lovoo/article/details/52541632
     private boolean checkSingleton() {
         File tmp = new File(Constants.DATA_HOME, Constants.LOCK_FILE_NAME);
+        log.trace("lock file = {}", tmp);
         try {
-            tmp.deleteOnExit();
             //noinspection ResultOfMethodCallIgnored
             tmp.createNewFile();
             RandomAccessFile r = new RandomAccessFile(tmp, "rw");
@@ -104,11 +106,23 @@ public class Drcom extends Application {
                 // 没有必要手动释放锁和关闭流，当程序退出时，他们会被关闭的.
                 return false;
             }
+            {
+                //@since (ver=1) 使用 3DES 加密密码进行存储
+                log.trace("lock file len = {}", r.length());
+                if (r.length() > 0) {
+                    int version = r.readInt();
+                    lastKey = r.readLong();//读取上次用于加密的key
+                    log.trace("version = {},long = {}", version, lastKey);
+                }
+                thisKey = System.currentTimeMillis();
+                r.seek(0L);//从头开始写（覆盖）
+                r.writeInt(Constants.VER_1);
+                r.writeLong(thisKey);//保存本次退出时用于加密的 key
+            }
         } catch (IOException e) {
             log.debug("IOException", e);
             return false;
         }
-        log.trace("lock file = {}", tmp);
         return true;
     }
 
@@ -169,5 +183,13 @@ public class Drcom extends Application {
         } catch (Exception e) {
             log.debug("Exception. 托盘不可用.", e);
         }
+    }
+
+    public static long getLastKey() {
+        return lastKey;
+    }
+
+    public static long getThisKey() {
+        return thisKey;
     }
 }

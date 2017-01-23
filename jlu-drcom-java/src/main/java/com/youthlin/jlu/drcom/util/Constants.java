@@ -36,4 +36,7 @@ public class Constants {
     public static final String KEY_HOSTNAME = "hostname";
     public static final String KEY_REMEMBER = "remember";
     public static final String KEY_AUTO_LOGIN = "auto_login";
+    public static final String KEY_VERSION = "version";
+    public static final int VER_1 = 1;//添加 3DES 加密： conf, lock 文件
+
 }

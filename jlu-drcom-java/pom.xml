@@ -6,7 +6,7 @@
 
     <groupId>com.youthlin</groupId>
     <artifactId>jlu-drcom-java</artifactId>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <properties>

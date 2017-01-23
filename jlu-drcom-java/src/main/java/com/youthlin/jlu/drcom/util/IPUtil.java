@@ -55,7 +55,7 @@ public class IPUtil {
                 List<InterfaceAddress> interfaceAddresses = networkInterface.getInterfaceAddresses();
                 for (InterfaceAddress interfaceAddress : interfaceAddresses) {
                     InetAddress address = interfaceAddress.getAddress();
-                    log.debug("{}/{}. address = {}", index, size, address);
+                    //log.trace("{}/{}. address = {}", index, size, address);
                     String hostAddress = address.getHostAddress();//to耗时do
                     if (hostAddress.contains(".")) {// not ':' -> IPv6
                         addr = hostAddress;
@@ -103,7 +103,11 @@ public class IPUtil {
             }
             //B 类：128.0.0.0 到 191.255.255.255  //B 类：172.16.0.0 到 172.31.255.255
             else if (a >= 128 && a < 192) {
-                if (!(a == 172 && (b >= 16 && b < 31))) {
+                // 169.254.X.X 是保留地址。
+                // 如果你的 IP 地址是自动获取 IP 地址，
+                // 而你在网络上又没有找到可用的 DHCP 服务器。就会得到其中一个 IP。
+                // UPDATE at 2017-01-23: http://baike.baidu.com/subview/8370/15816170.htm#5
+                if (!(a == 172 && (b >= 16 && b < 31)) && !(a == 169 && b == 254)) {
                     return true;
                 }
             }
