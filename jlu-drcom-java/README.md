@@ -1,11 +1,14 @@
 # jlu-drcom-java
-吉林大学校园网登录客户端 Java 版（第三方）
-  
+吉林大学校园网登录客户端 Java 版（第三方）  
+>项目地址： 
+>- https://github.com/YouthLin/jlu-drcom-client/tree/master/jlu-drcom-java  
+>- https://github.com/drcoms/jlu-drcom-client/tree/master/jlu-drcom-java  
+
 ## 下载
-点此链接下载 [http://dwz.cn/javadrcom](bin/jlu-drcom-java.zip)    
+点此链接选择最新版下载 [http://dwz.cn/drcombin](http://dwz.cn/bindrcom) (https://github.com/YouthLin/jlu-drcom-client/tree/master/jlu-drcom-java/bin)    
 如果您有兴趣,可以填一下调查问卷: [http://dwz.cn/javadrcomwj](https://wj.qq.com/s/1036693/3e7b)  
 或扫码填写:  
-![](screenshots/wjQR.png)
+![问卷](screenshots/wjQR.png)
 
 ## 项目来源
 周一(2017-01-9)回到学校发现原来的旧版客户端已经不能使用了，
@@ -60,7 +63,10 @@ Java 写一个 GUI 版本的客户端，因此就有了项目。
 当登录成功后，主界面将会自动隐藏到托盘, 然后将会弹出校园网通知. 
   
   >当您账户余额不足时，将会出现上图所示画面，
-请及时缴费以免断网.  (通常，最多可以欠费 40 RMB)  
+请及时缴费以免断网.  (通常，最多可以欠费 40 RMB) 
+ 
+  >欠费了也想看校园网通知? 试试 http://login.jlu.edu.cn/notice_info.php   
+
 
 - 登录成功  
 ![登录成功](screenshots/LoggedIn.png)  
@@ -101,6 +107,15 @@ Java 写一个 GUI 版本的客户端，因此就有了项目。
 您可以在 [jlu-drcom-protocol.md](jlu-drcom-protocol.md)
 中阅读更多。
 
+## 1.0.1 版更新内容
+- 新增：「查看校园网通知」菜单项
+- 新增：浏览器 ALT+Left/Right 前进后退(虽然并没有人会用)
+- 改进：密码存储策略，不再是明文存储，conf 文件
+- 修复：Linux 下的对话框「查看详情」导致界面错乱
+
+## TODO
+开学后收集反馈
+
 ## 鸣谢
 - 感谢 [jlu-drcom-client](https://github.com/drcoms/jlu-drcom-client) 中
 [newclient.py](https://github.com/drcoms/jlu-drcom-client/blob/master/newclient.py), 
@@ -122,4 +137,4 @@ jar 可执行软件采用 [ 署名 - 非商业性使用 - 相同方式共享 4.0
 请您在不违反 校规和/或任何有效约束 的前提下使用本软件。
 
 ## LICENSE
-此项目源代码遵循父目录 AGPL 协议。
+此项目源代码遵循 AGPL 协议。
