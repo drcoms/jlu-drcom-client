@@ -49,6 +49,7 @@ import static com.youthlin.jlu.drcom.util.FxUtil.loading;
  * Created by lin on 2017-01-08-008.
  * 登录页面
  */
+@SuppressWarnings("unused")
 public class AppController implements Initializable {
     private static final Logger log = LoggerFactory.getLogger(AppController.class);
     public Menu fileMenu;
@@ -67,6 +68,7 @@ public class AppController implements Initializable {
     public Label rememberLabel;
     private STATUS status = STATUS.ready;
     private DrcomTask drcomTask;
+    private String savedMac;//保存之前配置的 MAC: 当 ready 之前 init 时就退出时界面中没有 MAC 地址
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -115,7 +117,46 @@ public class AppController implements Initializable {
     }
 
     public void init() {
+        readNamePass();//先把可以立即确定的输入项填充
         readNetWorkInfo();
+    }
+
+    private void readNamePass() {
+        log.debug("读取配置文件中用户名密码信息...");
+        File file = new File(Constants.CONF_HOME, Constants.CONF_FILE_NAME);
+        if (file.exists()) {
+            try {
+                Properties conf = new Properties();
+                conf.load(new FileInputStream(file));
+                String username = conf.getProperty(Constants.KEY_USERNAME, "");
+                usernameTextField.setText(username);
+                String pass = conf.getProperty(Constants.KEY_PASSWORD, "");
+                {
+                    //@since 1.0.1 使用 3DES 加密密码进行存储
+                    String version = conf.getProperty(Constants.KEY_VERSION, "");
+                    String key = username + Drcom.getLastKey();//上次加密的 key
+                    if (version.equals(Constants.VER_1 + "")) {
+                        if (pass.length() > 0 && Drcom.getLastKey() != 0L) {
+                            byte[] bytes = ByteUtil.fromHex(pass);
+                            pass = new String(MD5.decrypt3DES(ByteUtil.ljust(key.getBytes(), MD5.DES_KEY_LEN), bytes));
+                            //log.trace("load key = {}, pass = {}", key, pass);
+                        }
+                    }
+                }//第一个版本是明文
+                ///log.trace("load pass = {}", pass);
+                passwordField.setText(pass);
+                savedMac = conf.getProperty(Constants.KEY_DASH_MAC);
+                rememberCheckBox.setSelected(Boolean.valueOf(conf.getProperty(Constants.KEY_REMEMBER, "true")));
+                autoLoginCheckBox.setSelected(Boolean.valueOf(conf.getProperty(Constants.KEY_AUTO_LOGIN, "false")));
+                // 获取 MAC 后才自动登录
+                log.debug("读取配置文件完成");
+            } catch (IOException e) {
+                log.debug("读取配置文件时 IO 异常", e);
+                e.printStackTrace();
+            }
+        } else {
+            log.debug("配置文件不存在");
+        }
     }
 
     private void readNetWorkInfo() {
@@ -144,7 +185,7 @@ public class AppController implements Initializable {
                                 }
                             }
                             log.debug("初始化界面完成.[用时:{}ms]", System.currentTimeMillis() - start);
-                            readConf();
+                            readMac();
                         });
                     }
                 }),
@@ -152,30 +193,13 @@ public class AppController implements Initializable {
         ).start();
     }
 
-    private void readConf() {
-        log.debug("读取配置文件...");
+    private void readMac() {
+        log.debug("读取配置文件中 MAC 地址信息...");
         File file = new File(Constants.CONF_HOME, Constants.CONF_FILE_NAME);
         if (file.exists()) {
             try {
                 Properties conf = new Properties();
                 conf.load(new FileInputStream(file));
-                String username = conf.getProperty(Constants.KEY_USERNAME, "");
-                usernameTextField.setText(username);
-                String pass = conf.getProperty(Constants.KEY_PASSWORD, "");
-                {
-                    //@since 1.0.1 使用 3DES 加密密码进行存储
-                    String version = conf.getProperty(Constants.KEY_VERSION, "");
-                    String key = username + Drcom.getLastKey();//上次加密的 key
-                    if (version.equals(Constants.VER_1 + "")) {
-                        if (pass.length() > 0 && Drcom.getLastKey() != 0L) {
-                            byte[] bytes = ByteUtil.fromHex(pass);
-                            pass = new String(MD5.decrypt3DES(ByteUtil.ljust(key.getBytes(), MD5.DES_KEY_LEN), bytes));
-                            //log.trace("load key = {}, pass = {}", key, pass);
-                        }
-                    }
-                }//第一个版本是明文
-                ///log.trace("load pass = {}", pass);
-                passwordField.setText(pass);
                 ObservableList<HostInfo> items = macComboBox.getItems();
                 String dashMac = conf.getProperty(Constants.KEY_DASH_MAC);
                 boolean find = false;
@@ -203,11 +227,6 @@ public class AppController implements Initializable {
                     macComboBox.getItems().add(hostInfo);
                     macComboBox.getSelectionModel().select(hostInfo);
                 }
-                rememberCheckBox.setSelected(Boolean.valueOf(conf.getProperty(Constants.KEY_REMEMBER, "true")));
-                autoLoginCheckBox.setSelected(Boolean.valueOf(conf.getProperty(Constants.KEY_AUTO_LOGIN, "false")));
-                if (autoLoginCheckBox.isSelected()) {
-                    onLoginButtonClick(new ActionEvent(autoLoginCheckBox, loginButton));
-                }
                 log.debug("读取配置文件完成");
             } catch (IOException e) {
                 log.debug("读取配置文件时 IO 异常", e);
@@ -231,6 +250,10 @@ public class AppController implements Initializable {
             macComboBox.requestFocus();//选择 MAC 地址
         } else {
             loginButton.requestFocus();//登录
+        }
+        // 获取 MAC 后才自动登录
+        if (autoLoginCheckBox.isSelected()) {
+            onLoginButtonClick(new ActionEvent(autoLoginCheckBox, loginButton));
         }
     }
 
@@ -301,7 +324,11 @@ public class AppController implements Initializable {
                 }
                 conf.put(Constants.KEY_PASSWORD, ByteUtil.toHexString(bytes));
             }
-            conf.put(Constants.KEY_DASH_MAC, macHexDash);
+            if (macHexDash.length() > 0) {
+                conf.put(Constants.KEY_DASH_MAC, macHexDash);
+            } else if (savedMac != null) {//正在获取 MAC 信息时就退出就保存上次配置的
+                conf.put(Constants.KEY_DASH_MAC, savedMac);
+            }
             conf.put(Constants.KEY_REMEMBER, Boolean.toString(true));
             conf.put(Constants.KEY_AUTO_LOGIN, Boolean.toString(auto));
             try {
