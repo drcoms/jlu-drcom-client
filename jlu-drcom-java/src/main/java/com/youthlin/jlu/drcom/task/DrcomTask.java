@@ -140,6 +140,10 @@ public class DrcomTask implements Runnable {
                     appController.statusLabel.setText("您已下线");
                 });
             }
+            if (client != null) {
+                client.close();
+                client = null;
+            }
         }
     }
 
@@ -148,11 +152,12 @@ public class DrcomTask implements Runnable {
      */
     private void init() throws DrcomException {
         try {
-            client = new DatagramSocket();
+            //每次使用同一个端口 若有多个客户端运行这里会抛出异常
+            client = new DatagramSocket(Constants.PORT);
             client.setSoTimeout(Constants.TIMEOUT);
             serverAddress = InetAddress.getByName(Constants.AUTH_SERVER);
         } catch (SocketException e) {
-            throw new DrcomException("构造 Socket 失败.(此错误不应出现)", e, DrcomException.CODE.ex_init);
+            throw new DrcomException("端口被占用, 您是否有其他客户端未退出?", e, DrcomException.CODE.ex_init);
         } catch (UnknownHostException e) {
             throw new DrcomException("找不到服务器.(请检查 DNS 设置)", DrcomException.CODE.ex_init);
         }
@@ -503,6 +508,10 @@ public class DrcomTask implements Runnable {
                 Platform.runLater(() -> appController.setStatus(STATUS.ready));
                 if (succ) {
                     FxUtil.showAlert("注销成功");
+                }
+                if (client != null) {
+                    client.close();
+                    client = null;
                 }
             }
         }

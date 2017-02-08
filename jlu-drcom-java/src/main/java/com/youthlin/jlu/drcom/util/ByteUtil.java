@@ -51,6 +51,7 @@ public class ByteUtil {
     }
 
     public static byte[] fromHex(String hexStr, char split) {
+        // hexStr = 00 01 AB str len = 8 length = (8+1)/3=3
         int length = (hexStr.length() + 1) / 3;
         byte[] ret = new byte[length];
         for (int i = 0; i < length; i++) {

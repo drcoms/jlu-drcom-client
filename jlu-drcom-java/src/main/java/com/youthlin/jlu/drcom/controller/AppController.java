@@ -91,6 +91,7 @@ public class AppController implements Initializable {
                 statusLabel.setText("初始化...");
                 loginButton.setDisable(true);
                 setUIDisable(true);
+                logoutButton.setFocusTraversable(false);//不能tab到按钮
                 break;
             case ready:
                 imageView.setVisible(false);
@@ -98,6 +99,7 @@ public class AppController implements Initializable {
                 loginButton.setText("登录(L)");
                 loginButton.setDisable(false);
                 setUIDisable(false);
+                logoutButton.setFocusTraversable(true);//可以tab到按钮
                 break;
             case onLogin:
                 imageView.setVisible(true);
@@ -105,6 +107,7 @@ public class AppController implements Initializable {
                 loginButton.setText("登录中...");
                 loginButton.setDisable(true);
                 setUIDisable(true);
+                statusLabel.requestFocus();
                 break;
             case logged:
                 imageView.setVisible(false);
@@ -134,7 +137,8 @@ public class AppController implements Initializable {
                 {
                     //@since 1.0.1 使用 3DES 加密密码进行存储
                     String version = conf.getProperty(Constants.KEY_VERSION, "");
-                    String key = username + Drcom.getLastKey();//上次加密的 key
+                    //上次加密的 key username 可长达25位 因此 lastKey 放在前
+                    String key = Drcom.getLastKey() + username;
                     if (version.equals(Constants.VER_1 + "")) {
                         if (pass.length() > 0 && Drcom.getLastKey() != 0L) {
                             byte[] bytes = ByteUtil.fromHex(pass);
@@ -284,12 +288,19 @@ public class AppController implements Initializable {
         if (username == null || username.trim().length() == 0) {
             success = false;
             tipLabel.setText(tipLabel.getText() + "请输入用户名. ");
+            usernameTextField.requestFocus();
         }
         if (password == null || password.trim().length() == 0) {
+            if (success) {
+                passwordField.requestFocus();
+            }
             success = false;
             tipLabel.setText(tipLabel.getText() + "请输入密码. ");
         }
         if (item == null) {
+            if (success) {
+                macComboBox.requestFocus();
+            }
             success = false;
             tipLabel.setText(tipLabel.getText() + "请选择 MAC 地址. ");
         }
@@ -317,7 +328,7 @@ public class AppController implements Initializable {
                 //@since (ver=1) 使用 3DES 加密密码进行存储
                 conf.put(Constants.KEY_VERSION, Constants.VER_1 + "");
                 byte[] bytes = new byte[0];
-                String key = username + Drcom.getThisKey();//本次加密的 key
+                String key = Drcom.getThisKey() + username;//本次加密的 key
                 if (password.length() > 0 && Drcom.getThisKey() != 0L) {//有密码才加密
                     bytes = MD5.encrypt3DES(ByteUtil.ljust(key.getBytes(), MD5.DES_KEY_LEN), password.getBytes());
                     //log.trace("store key = {}, pass = {}", key, ByteUtil.toHexString(bytes));
