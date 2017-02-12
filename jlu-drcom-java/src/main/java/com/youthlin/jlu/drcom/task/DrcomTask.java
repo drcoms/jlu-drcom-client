@@ -21,6 +21,8 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
+import static com.youthlin.utils.i18n.Translation.__;
+
 /**
  * Created by lin on 2017-01-11-011.
  * challenge, login, keep_alive, logout
@@ -89,13 +91,15 @@ public class DrcomTask implements Runnable {
             Thread.currentThread().setName("Challenge");
             if (!challenge(challengeTimes++)) {
                 log.debug("challenge failed...");
-                throw new DrcomException("请求发送认证信息失败! 服务器拒绝了请求." + DrcomException.CODE.ex_challenge);
+                /*TRANSLATORS: 0 Exception code*/
+                throw new DrcomException(__("Server refused the request.{0}", 0, DrcomException.CODE.ex_challenge));
             }
 
             Thread.currentThread().setName("L o g i n");
             if (!login()) {
                 log.debug("login failed...");
-                throw new DrcomException("发送认证信息失败!" + DrcomException.CODE.ex_login);
+                /*TRANSLATORS: 0 Exception code*/
+                throw new DrcomException(__("Failed to send authentication information.{0}", 0, DrcomException.CODE.ex_login));
             }
 
             log.debug("登录成功!");
@@ -114,14 +118,12 @@ public class DrcomTask implements Runnable {
         } catch (SocketTimeoutException e) {
             log.debug("通信超时", e);
             exception = true;
-            FxUtil.showAlertWithException(new DrcomException("与服务器通信超时.\n"
-                    + "可能是网络状态变化或您电脑休眠时间过长与服务器失去了连接,\n"
-                    + "请尝试重新登录.",
+            FxUtil.showAlertWithException(new DrcomException(__("Waisting server response time out.\nIt may caused by Network state changed or your device slept too long.\nPlease try login again.\n"),
                     e, DrcomException.CODE.ex_timeout));
         } catch (IOException e) {
             log.debug("IO 异常", e);
             exception = true;
-            FxUtil.showAlertWithException(new DrcomException("IO 异常, 请检查网络.", e, DrcomException.CODE.ex_io));
+            FxUtil.showAlertWithException(new DrcomException(__("IO Exception, please check your network."), e, DrcomException.CODE.ex_io));
         } catch (DrcomException e) {
             log.debug("登录异常", e);
             exception = true;
@@ -129,15 +131,15 @@ public class DrcomTask implements Runnable {
         } catch (InterruptedException e) {
             log.debug("线程异常", e);
             exception = true;
-            FxUtil.showAlertWithException(new DrcomException("线程异常, 程序出错了.", e, DrcomException.CODE.ex_thread));
+            FxUtil.showAlertWithException(new DrcomException(__("Thread Exception, There is a error."), e, DrcomException.CODE.ex_thread));
         } catch (Exception e) {
             exception = true;
-            FxUtil.showAlertWithException(new DrcomException("未知错误.", e));
+            FxUtil.showAlertWithException(new DrcomException(__("Unknown error"), e));
         } finally {
             if (exception) {//若发生了异常：密码错误等。 则应允许重新登录
                 Platform.runLater(() -> {
                     appController.setStatus(STATUS.ready);
-                    appController.statusLabel.setText("您已下线");
+                    appController.statusLabel.setText(__("You are off line now."));
                 });
             }
             if (client != null) {
@@ -157,9 +159,9 @@ public class DrcomTask implements Runnable {
             client.setSoTimeout(Constants.TIMEOUT);
             serverAddress = InetAddress.getByName(Constants.AUTH_SERVER);
         } catch (SocketException e) {
-            throw new DrcomException("端口被占用, 您是否有其他客户端未退出?", e, DrcomException.CODE.ex_init);
+            throw new DrcomException(__("The port is occupied, do you have any other clients not exited?"), e, DrcomException.CODE.ex_init);
         } catch (UnknownHostException e) {
-            throw new DrcomException("找不到服务器.(请检查 DNS 设置)", DrcomException.CODE.ex_init);
+            throw new DrcomException(__("The server could not be found. (check DNS settings)"), DrcomException.CODE.ex_init);
         }
     }
 
@@ -188,9 +190,9 @@ public class DrcomTask implements Runnable {
             log.debug("challenge fail, unrecognized response.【{}】", ByteUtil.toHexString(buf));
             return false;
         } catch (SocketTimeoutException e) {
-            throw new DrcomException("请求发送认证信息失败! 请求超时." + DrcomException.CODE.ex_challenge);
+            throw new DrcomException(__("Challenge server failed, time out. {0}", 0, DrcomException.CODE.ex_challenge));
         } catch (IOException e) {
-            throw new DrcomException("请求发送认证信息失败! I/O 异常." + DrcomException.CODE.ex_challenge);
+            throw new DrcomException(__("Failed to send authentication information. {0}", 0, DrcomException.CODE.ex_challenge));
         }
     }
 
@@ -205,11 +207,11 @@ public class DrcomTask implements Runnable {
         if (recv[0] != 0x04) {
             if (recv[0] == 0x05) {
                 if (recv[4] == 0x0B) {
-                    throw new DrcomException("MAC 地址错误, 请选择在网络中心注册的地址.", DrcomException.CODE.ex_login);
+                    throw new DrcomException(__("Invalid Mac Address, please select the address registered in ip.jlu.edu.cn") + "MAC 地址错误, 请选择在网络中心注册的地址.", DrcomException.CODE.ex_login);
                 }
-                throw new DrcomException("用户名或密码错误.", DrcomException.CODE.ex_login);
+                throw new DrcomException(__("Invalid username or password."), DrcomException.CODE.ex_login);
             } else {
-                throw new DrcomException("登录失败, 发生了未知错误.", DrcomException.CODE.ex_login);
+                throw new DrcomException(__("Failed to login, unknown error."), DrcomException.CODE.ex_login);
             }
         }
         // 保存 tail1. 构造 keep38 要用 md5a(在mkptk中保存) 和 tail1
@@ -502,12 +504,12 @@ public class DrcomTask implements Runnable {
             } catch (Throwable t) {
                 succ = false;
                 log.debug("注销异常", t);
-                FxUtil.showAlertWithException(new DrcomException("注销异常…….", t));
+                FxUtil.showAlertWithException(new DrcomException(__("Exception when logout."), t));
             } finally {
                 //不管怎样重新登录
                 Platform.runLater(() -> appController.setStatus(STATUS.ready));
                 if (succ) {
-                    FxUtil.showAlert("注销成功");
+                    FxUtil.showAlert(__("Logout success."));
                 }
                 if (client != null) {
                     client.close();

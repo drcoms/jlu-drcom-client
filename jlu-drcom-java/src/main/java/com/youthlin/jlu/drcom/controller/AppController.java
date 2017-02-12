@@ -21,12 +21,15 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +38,6 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.time.Year;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +46,8 @@ import java.util.ResourceBundle;
 
 import static com.youthlin.jlu.drcom.util.FxUtil.icon;
 import static com.youthlin.jlu.drcom.util.FxUtil.loading;
+import static com.youthlin.utils.i18n.Translation.__;
+import static com.youthlin.utils.i18n.Translation._x;
 
 
 /**
@@ -67,6 +71,16 @@ public class AppController implements Initializable {
     public ImageView imageView;
     public Label autoLoginLabel;
     public Label rememberLabel;
+    public MenuItem noticeMenuItem;
+    public MenuItem quitMenuItem;
+    public MenuItem introduceMenuItem;
+    public MenuItem aboutMenuItem;
+    public Label usernameLabel;
+    public Tooltip usernameToolTip;
+    public Tooltip passwordToolTip;
+    public Tooltip macToolTip;
+    public Label passwordLabel;
+    public Text welcomeText;
     private STATUS status = STATUS.ready;
     private DrcomTask drcomTask;
     private String savedMac;//保存之前配置的 MAC: 当 ready 之前 init 时就退出时界面中没有 MAC 地址
@@ -74,6 +88,24 @@ public class AppController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         log.debug("初始化界面...");
+        welcomeText.setText(__("Welcome to use JLU Drcom (Java Version)"));
+        fileMenu.setText(__("File(F)"));
+        noticeMenuItem.setText(_x("Notice", "校园网通知"));
+        quitMenuItem.setText(__("Quit"));
+        helpMenu.setText(__("Help(H)"));
+        introduceMenuItem.setText(__("Introduce"));
+        aboutMenuItem.setText(__("About"));
+        usernameLabel.setText(__("Username"));
+        usernameToolTip.setText(__("Part before @ symbol of your JLU email account"));
+        passwordLabel.setText(__("Password"));
+        passwordField.setPromptText(__("Password"));
+        passwordToolTip.setText(__("Password of your JLU email account"));
+        macToolTip.setText(__("MAC address registered in Network Center"));
+        rememberLabel.setText(__("Remember"));
+        autoLoginLabel.setText(__("Auto Login"));
+        loginButton.setText(__("Login(L)"));
+        logoutButton.setText(__("Logout(X)"));
+        statusLabel.setText(__("Ready"));
         Drcom.setAppController(this);
         imageView.setImage(loading);
         setStatus(STATUS.init);
@@ -89,31 +121,31 @@ public class AppController implements Initializable {
         switch (status) {
             case init:
                 imageView.setVisible(true);
-                statusLabel.setText("初始化...");
+                statusLabel.setText(__("Initialization..."));
                 loginButton.setDisable(true);
                 setUIDisable(true);
                 logoutButton.setFocusTraversable(false);//不能tab到按钮
                 break;
             case ready:
                 imageView.setVisible(false);
-                statusLabel.setText("就绪");
-                loginButton.setText("登录(L)");
+                statusLabel.setText(__("Ready"));
+                loginButton.setText(__("Login(L)"));
                 loginButton.setDisable(false);
                 setUIDisable(false);
                 logoutButton.setFocusTraversable(true);//可以tab到按钮
                 break;
             case onLogin:
                 imageView.setVisible(true);
-                statusLabel.setText("登录中...");
-                loginButton.setText("登录中...");
+                statusLabel.setText(__("Logging in..."));
+                loginButton.setText(__("Logging in..."));
                 loginButton.setDisable(true);
                 setUIDisable(true);
                 statusLabel.requestFocus();
                 break;
             case logged:
                 imageView.setVisible(false);
-                statusLabel.setText("就绪");
-                loginButton.setText("注销(L)");
+                statusLabel.setText(__("Logout"));
+                loginButton.setText(__("Logout(L)"));
                 loginButton.setDisable(false);
                 setUIDisable(true);
                 break;
@@ -169,13 +201,13 @@ public class AppController implements Initializable {
 
     private void readNetWorkInfo() {
         log.debug("获取网络接口信息...");
-        statusLabel.setText("获取网络接口信息...");
+        statusLabel.setText(__("Getting network interface information..."));
         long start = System.currentTimeMillis();
         new Thread(() -> IPUtil.getHostInfo(
                 new IPUtil.OnGetHostInfoCallback() {
                     @Override
                     public void update(int current, int total) {
-                        FxUtil.updateLabel(statusLabel, "(" + current + '/' + total + ")获取网络接口信息...");
+                        FxUtil.updateLabel(statusLabel, __("({0}/{1})Getting network interface information...", 0, current, total));
                     }
 
                     @Override
@@ -231,7 +263,7 @@ public class AppController implements Initializable {
                 if (!find && dashMac != null && dashMac.trim().length() > 0) {
                     //保存的MAC不是本机MAC地址，保存的配置也加入选项并设为默认: 比如是用的路由器MAC
                     HostInfo hostInfo = new HostInfo(conf.getProperty(Constants.KEY_HOSTNAME, "Windows-10"),
-                            dashMac, "保存的 MAC 地址");
+                            dashMac, __("Saved Mac Address"));
                     macComboBox.getItems().add(hostInfo);
                     macComboBox.getSelectionModel().select(hostInfo);
                 }
@@ -291,7 +323,7 @@ public class AppController implements Initializable {
         boolean success = true;
         if (username == null || username.trim().length() == 0) {
             success = false;
-            tipLabel.setText(tipLabel.getText() + "请输入用户名. ");
+            tipLabel.setText(__("{0} Please input username.", 0, tipLabel.getText()));
             usernameTextField.requestFocus();
         }
         if (password == null || password.trim().length() == 0) {
@@ -299,14 +331,14 @@ public class AppController implements Initializable {
                 passwordField.requestFocus();
             }
             success = false;
-            tipLabel.setText(tipLabel.getText() + "请输入密码. ");
+            tipLabel.setText(__("{0} Please input password.", 0, tipLabel.getText()));
         }
         if (item == null) {
             if (success) {
                 macComboBox.requestFocus();
             }
             success = false;
-            tipLabel.setText(tipLabel.getText() + "请选择 MAC 地址. ");
+            tipLabel.setText(__("{0} Please choose Mac.", 0, tipLabel.getText()));
         }
         return success;
     }
@@ -404,10 +436,7 @@ public class AppController implements Initializable {
 
     public void onInfoMenuItemClick(ActionEvent actionEvent) {
         log.trace("点击说明菜单项...");
-        FxUtil.showAlert("欢迎使用吉林大学校园网登录客户端 Java 版(非官方)\n"
-                + "请不要同时连接有线网络与无线网络\n"
-                + "网络变更有可能需要重启程序\n"
-                + "如有更多问题您可打开[关于]菜单与作者取得联系\n");
+        FxUtil.showAlert(__("Welcome to use JLU Drcom(Java Version, 3rd party)\nPlease do not connect wired network and wireless network at the same time\nYou may need to restart the client when network changed.\nYou can contact me on 'About' menu.\n"));
     }
 
     public void onAboutMenuItemClick(ActionEvent actionEvent) {
@@ -418,16 +447,15 @@ public class AppController implements Initializable {
         } else {
             yearStr = Constants.COPYRIGHT_YEAR_START;
         }
-        Alert alert = FxUtil.buildAlert(MessageFormat.format(
-                "© {0} {1}\nQQ 群：{2}\n许   可：{3}\n介   绍：{4}\n",
-                yearStr, "Youth．霖", "597417651", "CC BY-NC-SA", Constants.ARTICLE_URL)
+        Alert alert = FxUtil.buildAlert(/*TRANSLATORS: 0 year(eg:2017-2018). 1 Author nickname. 2 QQ Group. 3 CC by-nc-sa. 4 blog url.*/
+                __("© {0} {1}\nQQ Group: {2}\nLicense     : {3}\nArticle       : {4}", 0, yearStr, "Youth．霖", "597417651", "CC BY-NC-SA", Constants.ARTICLE_URL)
         );
-        ButtonType contact = new ButtonType("联系作者");
-        ButtonType projectHome = new ButtonType("项目主页");
+        ButtonType contact = new ButtonType(__("Contact Author"));
+        ButtonType projectHome = new ButtonType(__("Project Home"));
         alert.getButtonTypes().addAll(contact, projectHome);
-        alert.setTitle(Constants.ABOUT_TITLE);
+        alert.setTitle(__("About"));
         alert.setGraphic(new ImageView(icon));
-        alert.setHeaderText("关于本软件");
+        alert.setHeaderText(__("About this software"));
 
         Platform.runLater(() -> {
             Optional<ButtonType> result = alert.showAndWait();

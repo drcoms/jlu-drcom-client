@@ -1,5 +1,6 @@
 package com.youthlin.jlu.drcom.util;
 
+import com.youthlin.jlu.drcom.Drcom;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -24,14 +25,14 @@ public class Browser {
 
     public Browser(String url, Double width, Double height) {
         urlBar.setText(url);
-        stage.setTitle(Constants.TITLE);
+        stage.setTitle(Drcom.TITLE);
         WebEngine engine = webView.getEngine();
         engine.load(url);
         //http://blog.csdn.net/oppo117/article/details/17354453
         engine.locationProperty().addListener((observable, oldValue, newValue) -> urlBar.setText(newValue));
         engine.titleProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                stage.setTitle(newValue + " - " + Constants.TITLE);
+                stage.setTitle(newValue + " - " + Drcom.TITLE);
             }
         });
         stage.getIcons().add(FxUtil.icon);
@@ -68,7 +69,7 @@ public class Browser {
                 if (KeyCode.LEFT.equals(code)) {
                     back();//ALT+LEFT
                 } else if (KeyCode.RIGHT.equals(code)) {
-                    forword();//ALT+RIGHT
+                    forward();//ALT+RIGHT
                 }
             }
         });
@@ -104,7 +105,7 @@ public class Browser {
         webView.getEngine().executeScript("history.back()");
     }
 
-    public void forword() {
+    public void forward() {
         webView.getEngine().executeScript("history.forward()");
     }
 }

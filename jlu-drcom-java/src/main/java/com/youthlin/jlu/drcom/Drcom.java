@@ -4,6 +4,7 @@ import com.youthlin.jlu.drcom.bean.STATUS;
 import com.youthlin.jlu.drcom.controller.AppController;
 import com.youthlin.jlu.drcom.util.Constants;
 import com.youthlin.jlu.drcom.util.FxUtil;
+import com.youthlin.utils.i18n.Translation;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -29,13 +30,18 @@ import java.nio.channels.FileLock;
 import java.util.UUID;
 
 import static com.youthlin.jlu.drcom.util.FxUtil.icon;
+import static com.youthlin.utils.i18n.Translation.__;
 
 //Created by lin on 2017-01-08-008.
 public class Drcom extends Application {
+    public static final String TITLE;
+
     static {
         //放在 log 之前初始化//前一次commit被IDEA自动格式化放乱了
         System.setProperty("drcom.java.sessionID", UUID.randomUUID().toString().substring(24));
         System.setProperty("drcom.java.data.home", Constants.DATA_HOME);
+        Translation.setDft(Translation.getBundle("Drcom"));
+        TITLE = __("JLU Drcom Java Version");
     }
 
     private static final Logger log = LoggerFactory.getLogger(Drcom.class);
@@ -64,21 +70,19 @@ public class Drcom extends Application {
         Drcom.stage = stage;
         if (!checkSingleton()) {
             log.debug("已有运行中客户端");
-            Alert alert = FxUtil.buildAlert("已有运行中的客户端，不需重复运行.");
-            alert.setHeaderText("提示：已有运行中的客户端未关闭。");
+            Alert alert = FxUtil.buildAlert(__("There is a running client, no necessary to start a new client."));
+            alert.setHeaderText(__("Note: There is already a running client."));
             alert.setOnHiding(e -> Platform.exit());//关闭对话框后退出
             alert.show();
             return;
         }
         stage.getIcons().add(icon);
-        stage.setTitle(Constants.TITLE);
+        stage.setTitle(TITLE);
         Parent root = FXMLLoader.load(getClass().getResource("/login.fxml"));
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.sizeToScene();
-        stage.setMinWidth(300);
-        stage.setMaxWidth(300);
-        stage.setMinHeight(300);
+        stage.setMinWidth(310);
         stage.centerOnScreen();
         stage.setResizable(false);
         // https://gist.github.com/jewelsea/e231e89e8d36ef4e5d8a#file-javafxtrayiconsample-java-L39
@@ -137,9 +141,9 @@ public class Drcom extends Application {
 
     private void enableTray(final Stage stage) {
         PopupMenu popupMenu = new PopupMenu();
-        java.awt.MenuItem openItem = new java.awt.MenuItem("显示 / 隐藏");
-        java.awt.MenuItem logout = new java.awt.MenuItem("注销");
-        java.awt.MenuItem quitItem = new java.awt.MenuItem("退出");
+        java.awt.MenuItem openItem = new java.awt.MenuItem(__("Show / Hide"));
+        java.awt.MenuItem logout = new java.awt.MenuItem(__("Logout"));
+        java.awt.MenuItem quitItem = new java.awt.MenuItem(__("Quit"));
         openItem.addActionListener(e -> {
             if (stage.isShowing()) {
                 Platform.runLater(stage::hide);
@@ -165,7 +169,7 @@ public class Drcom extends Application {
         try {
             SystemTray tray = SystemTray.getSystemTray();
             BufferedImage image = ImageIO.read(Drcom.class.getResourceAsStream(Constants.LOGO_URL));
-            trayIcon = new TrayIcon(image, Constants.TITLE, popupMenu);
+            trayIcon = new TrayIcon(image, TITLE, popupMenu);
             trayIcon.setImageAutoSize(true);
             tray.add(trayIcon);
             trayIcon.addMouseListener(new MouseAdapter() {

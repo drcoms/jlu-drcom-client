@@ -8,8 +8,6 @@ import java.io.File;
  */
 @SuppressWarnings("WeakerAccess")
 public class Constants {
-    public static final String TITLE = "JLU Drcom Java 版";
-    public static final String ABOUT_TITLE = "关于";
     public static final String LOGO_URL = "/dr-logo.png";
     public static final String LOADING_URL = "/loading.gif";
     public static final String AUTH_SERVER = "auth.jlu.edu.cn";//10.100.61.3
