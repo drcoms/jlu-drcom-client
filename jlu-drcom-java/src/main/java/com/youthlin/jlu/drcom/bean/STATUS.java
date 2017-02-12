@@ -5,5 +5,5 @@ package com.youthlin.jlu.drcom.bean;
  * 登录状态
  */
 public enum STATUS {
-    ready, onLogin, logged
+    init, ready, onLogin, logged
 }

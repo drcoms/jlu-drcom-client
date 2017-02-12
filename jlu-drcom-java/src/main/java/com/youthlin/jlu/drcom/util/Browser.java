@@ -1,5 +1,6 @@
 package com.youthlin.jlu.drcom.util;
 
+import com.youthlin.jlu.drcom.Drcom;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -24,15 +25,14 @@ public class Browser {
 
     public Browser(String url, Double width, Double height) {
         urlBar.setText(url);
-        //urlBar.setEditable(false);
-        stage.setTitle(Constants.TITLE);
+        stage.setTitle(Drcom.TITLE);
         WebEngine engine = webView.getEngine();
         engine.load(url);
         //http://blog.csdn.net/oppo117/article/details/17354453
         engine.locationProperty().addListener((observable, oldValue, newValue) -> urlBar.setText(newValue));
         engine.titleProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                stage.setTitle(newValue + " - " + Constants.TITLE);
+                stage.setTitle(newValue + " - " + Drcom.TITLE);
             }
         });
         stage.getIcons().add(FxUtil.icon);
@@ -58,8 +58,19 @@ public class Browser {
         });
         pane.setOnKeyReleased(event -> {
             KeyCode code = event.getCode();
-            if (event.isControlDown() && (KeyCode.W.equals(code)) || KeyCode.Q.equals(code)) {
-                stage.hide();//CTRL+W 或 CTRL+Q 关闭
+            if (event.isControlDown()) {
+                if ((KeyCode.W.equals(code)) || KeyCode.Q.equals(code)) {
+                    stage.hide();//CTRL+W 或 CTRL+Q 关闭
+                } else if (KeyCode.R.equals(code) || KeyCode.F5.equals(code)) {
+                    reload();//CTRL+R CTRL+F5 重新加载
+                }
+            }
+            if (event.isAltDown()) {
+                if (KeyCode.LEFT.equals(code)) {
+                    back();//ALT+LEFT
+                } else if (KeyCode.RIGHT.equals(code)) {
+                    forward();//ALT+RIGHT
+                }
             }
         });
     }
@@ -84,5 +95,17 @@ public class Browser {
 
     public Stage getStage() {
         return stage;
+    }
+
+    public void reload() {
+        webView.getEngine().reload();
+    }
+
+    public void back() {
+        webView.getEngine().executeScript("history.back()");
+    }
+
+    public void forward() {
+        webView.getEngine().executeScript("history.forward()");
     }
 }

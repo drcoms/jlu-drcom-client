@@ -8,8 +8,6 @@ import java.io.File;
  */
 @SuppressWarnings("WeakerAccess")
 public class Constants {
-    public static final String TITLE = "JLU Drcom Java 版";
-    public static final String ABOUT_TITLE = "关于";
     public static final String LOGO_URL = "/dr-logo.png";
     public static final String LOADING_URL = "/loading.gif";
     public static final String AUTH_SERVER = "auth.jlu.edu.cn";//10.100.61.3
@@ -20,6 +18,10 @@ public class Constants {
 
     public static final String ARTICLE_URL = "http://youthlin.com/?p=1391";
     public static final String PROJECT_HOME = "https://github.com/YouthLin/jlu-drcom-client/tree/master/jlu-drcom-java";
+    public static final String NOTICE_URL = "http://login.jlu.edu.cn/notice.php";
+    public static final double NOTICE_W = 592;
+    public static final double NOTICE_H = 450;
+
 
     public static final String DATA_HOME = System.getProperty("user.home", ".") + File.separator + ".drcom";
     public static final String CONF_HOME = DATA_HOME + File.separator + "conf";
@@ -32,4 +34,7 @@ public class Constants {
     public static final String KEY_HOSTNAME = "hostname";
     public static final String KEY_REMEMBER = "remember";
     public static final String KEY_AUTO_LOGIN = "auto_login";
+    public static final String KEY_VERSION = "version";
+    public static final int VER_1 = 1;//添加 3DES 加密： conf, lock 文件
+
 }

@@ -23,13 +23,14 @@
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" onKeyReleased="#onKeyReleased" xmlns="http://javafx.com/javafx/8.0.72"
             fx:controller="com.youthlin.jlu.drcom.controller.AppController">
     <top>
-        <MenuBar>
+        <MenuBar useSystemMenuBar="true">
             <Menu fx:id="fileMenu" mnemonicParsing="false" text="文件(F)">
-                <MenuItem accelerator="CTRL+X" onAction="#onExitMenuItemClick" text="退出"/>
+                <MenuItem onAction="#onNoticeMenuItemClick" text="校园网通知" fx:id="noticeMenuItem"/>
+                <MenuItem accelerator="CTRL+X" onAction="#onExitMenuItemClick" text="退出" fx:id="quitMenuItem"/>
             </Menu>
             <Menu fx:id="helpMenu" mnemonicParsing="false" text="帮助(H)">
-                <MenuItem onAction="#onInfoMenuItemClick" text="说明"/>
-                <MenuItem onAction="#onAboutMenuItemClick" text="关于"/>
+                <MenuItem onAction="#onInfoMenuItemClick" text="说明" fx:id="introduceMenuItem"/>
+                <MenuItem onAction="#onAboutMenuItemClick" text="关于" fx:id="aboutMenuItem"/>
             </Menu>
         </MenuBar>
     </top>
@@ -39,29 +40,29 @@
                 <padding>
                     <Insets bottom="5" left="5" right="5" top="5"/>
                 </padding>
-                <Text text="欢迎使用 JLU Drcom Java 版" GridPane.columnIndex="0" GridPane.columnSpan="4"
+                <Text fx:id="welcomeText" text="欢迎使用 JLU Drcom Java 版" GridPane.columnIndex="0" GridPane.columnSpan="4"
                       GridPane.rowIndex="0"/>
 
-                <Label text="账号" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <Label fx:id="usernameLabel" text="账号" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
                 <TextField fx:id="usernameTextField" onKeyReleased="#onKeyReleased" promptText="chenml5513"
                            GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1">
                     <tooltip>
-                        <Tooltip text="吉大邮箱@账号之前的部分"/>
+                        <Tooltip fx:id="usernameToolTip" text="吉大邮箱账号@之前的部分"/>
                     </tooltip>
                 </TextField>
 
-                <Label text="密码" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <Label fx:id="passwordLabel" text="密码" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
                 <PasswordField fx:id="passwordField" onKeyReleased="#onKeyReleased" promptText="邮箱密码"
                                GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2">
                     <tooltip>
-                        <Tooltip text="吉大邮箱密码"/>
+                        <Tooltip fx:id="passwordToolTip" text="吉大邮箱密码"/>
                     </tooltip>
                 </PasswordField>
 
                 <Label text="MAC" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
                 <ComboBox fx:id="macComboBox" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3">
                     <tooltip>
-                        <Tooltip text="在网络中心登记的物理地址"/>
+                        <Tooltip fx:id="macToolTip" text="在网络中心登记的物理地址"/>
                     </tooltip>
                 </ComboBox>
 
@@ -69,17 +70,11 @@
                        GridPane.rowIndex="4"/>
                 <CheckBox fx:id="rememberCheckBox" onAction="#onRememberAction" selected="true" GridPane.columnIndex="1"
                           GridPane.rowIndex="4">
-                    <tooltip>
-                        <Tooltip text="记住表单内容"/>
-                    </tooltip>
                 </CheckBox>
                 <Label fx:id="autoLoginLabel" onMouseClicked="#onAutoLabelClick" text="自动登录" GridPane.columnIndex="2"
                        GridPane.rowIndex="4"/>
                 <CheckBox fx:id="autoLoginCheckBox" onAction="#onAutoAction" GridPane.columnIndex="3"
                           GridPane.rowIndex="4">
-                    <tooltip>
-                        <Tooltip text="启动软件后自动登录"/>
-                    </tooltip>
                 </CheckBox>
 
                 <ImageView fx:id="imageView" visible="false" GridPane.columnIndex="0" GridPane.rowIndex="6"/>

@@ -1,0 +1,279 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: JLU Drcom Java\n"
+"POT-Creation-Date: 2017-02-12 22:10+0800\n"
+"PO-Revision-Date: 2017-02-12 22:10+0800\n"
+"Last-Translator: YouthLin Chen <root@youthlin.com>\n"
+"Language-Team: \n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.11\n"
+"X-Poedit-Basepath: ../java\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_x:2c,1\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: com/youthlin/jlu/drcom/Drcom.java:44
+msgid "JLU Drcom Java Version"
+msgstr "JLU Drcom Java 版"
+
+#: com/youthlin/jlu/drcom/Drcom.java:73
+msgid "There is a running client, no necessary to start a new client."
+msgstr "已有运行中的客户端，不需重复运行."
+
+#: com/youthlin/jlu/drcom/Drcom.java:74
+msgid "Note: There is already a running client."
+msgstr "提示：已有运行中的客户端未关闭。"
+
+#: com/youthlin/jlu/drcom/Drcom.java:144
+msgid "Show / Hide"
+msgstr "显示 / 隐藏"
+
+#: com/youthlin/jlu/drcom/Drcom.java:145
+#: com/youthlin/jlu/drcom/controller/AppController.java:147
+msgid "Logout"
+msgstr "注销"
+
+#: com/youthlin/jlu/drcom/Drcom.java:146
+#: com/youthlin/jlu/drcom/controller/AppController.java:94
+msgid "Quit"
+msgstr "退出"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:91
+msgid "Welcome to use JLU Drcom (Java Version)"
+msgstr "欢迎使用 JLU Drcom Java 版"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:92
+msgid "File(F)"
+msgstr "文件(F)"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:93
+msgctxt "校园网通知"
+msgid "Notice"
+msgstr "校园网通知"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:95
+msgid "Help(H)"
+msgstr "帮助(H)"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:96
+msgid "Introduce"
+msgstr "说明"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:97
+#: com/youthlin/jlu/drcom/controller/AppController.java:456
+msgid "About"
+msgstr "关于"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:98
+msgid "Username"
+msgstr "用户名"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:99
+msgid "Part before @ symbol of your JLU email account"
+msgstr "吉大邮箱@符号之前的部分"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:100
+#: com/youthlin/jlu/drcom/controller/AppController.java:101
+msgid "Password"
+msgstr "密码"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:102
+msgid "Password of your JLU email account"
+msgstr "吉大邮箱的密码"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:103
+msgid "MAC address registered in Network Center"
+msgstr "网络中心注册的 MAC 地址"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:104
+msgid "Remember"
+msgstr "记住密码"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:105
+msgid "Auto Login"
+msgstr "自动登录"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:106
+#: com/youthlin/jlu/drcom/controller/AppController.java:132
+msgid "Login(L)"
+msgstr "登录(L)"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:107
+msgid "Logout(X)"
+msgstr "注销(X)"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:108
+#: com/youthlin/jlu/drcom/controller/AppController.java:131
+msgid "Ready"
+msgstr "就绪"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:124
+msgid "Initialization..."
+msgstr "初始化..."
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:139
+#: com/youthlin/jlu/drcom/controller/AppController.java:140
+msgid "Logging in..."
+msgstr "登录中..."
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:148
+msgid "Logout(L)"
+msgstr "注销(L)"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:204
+msgid "Getting network interface information..."
+msgstr "获取网络接口信息..."
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:210
+#, java-format
+msgid "({0}/{1})Getting network interface information..."
+msgstr "({0}/{1})获取网络接口信息..."
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:266
+msgid "Saved Mac Address"
+msgstr "保存的 MAC 地址"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:326
+#, java-format
+msgid "{0} Please input username."
+msgstr "{0} 请输入用户名"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:334
+#, java-format
+msgid "{0} Please input password."
+msgstr "{0} 请输入密码"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:341
+#, java-format
+msgid "{0} Please choose Mac."
+msgstr "{0} 请选择 MAC 地址"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:439
+msgid ""
+"Welcome to use JLU Drcom(Java Version, 3rd party)\n"
+"Please do not connect wired network and wireless network at the same time\n"
+"You may need to restart the client when network changed.\n"
+"You can contact me on 'About' menu.\n"
+msgstr ""
+"欢迎使用吉林大学校园网登录客户端 Java 版(非官方)\n"
+"请不要同时连接有线网络与无线网络\n"
+"网络变更有可能需要重启程序\n"
+"如有更多问题您可打开[关于]菜单与作者取得联系\n"
+
+#. TRANSLATORS: 0 year(eg:2017-2018). 1 Author nickname. 2 QQ Group. 3 CC by-nc-sa. 4 blog url.
+#: com/youthlin/jlu/drcom/controller/AppController.java:451
+#, java-format
+msgid ""
+"© {0} {1}\n"
+"QQ Group: {2}\n"
+"License     : {3}\n"
+"Article       : {4}"
+msgstr ""
+"© {0} {1}\n"
+"QQ 群：{2}\n"
+"许   可：{3}\n"
+"介   绍：{4}"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:453
+msgid "Contact Author"
+msgstr "联系作者"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:454
+msgid "Project Home"
+msgstr "项目主页"
+
+#: com/youthlin/jlu/drcom/controller/AppController.java:458
+msgid "About this software"
+msgstr "关于本软件"
+
+#. TRANSLATORS: 0 Exception code
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:95
+#, java-format
+msgid "Server refused the request.{0}"
+msgstr "请求发送认证信息失败! 服务器拒绝了请求. {0}"
+
+#. TRANSLATORS: 0 Exception code
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:102
+#, java-format
+msgid "Failed to send authentication information.{0}"
+msgstr "发送认证信息失败! {0}"
+
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:121
+msgid ""
+"Waisting server response time out.\n"
+"It may caused by Network state changed or your device slept too long.\n"
+"Please try login again.\n"
+msgstr ""
+"与服务器通信超时.\n"
+"可能是网络状态变化或您电脑休眠时间过长与服务器失去了连接,\n"
+"请尝试重新登录.\n"
+
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:126
+msgid "IO Exception, please check your network."
+msgstr "IO 异常, 请检查网络."
+
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:134
+msgid "Thread Exception, There is a error."
+msgstr "线程异常, 程序出错了."
+
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:137
+msgid "Unknown error"
+msgstr "未知错误."
+
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:142
+msgid "You are off line now."
+msgstr "您已下线"
+
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:162
+msgid "The port is occupied, do you have any other clients not exited?"
+msgstr "端口被占用, 您是否有其他客户端未退出?"
+
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:164
+msgid "The server could not be found. (check DNS settings)"
+msgstr "找不到服务器.(请检查 DNS 设置)"
+
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:193
+#, java-format
+msgid "Challenge server failed, time out. {0}"
+msgstr "请求发送认证信息失败! 请求超时. {0}"
+
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:195
+#, java-format
+msgid "Failed to send authentication information. {0}"
+msgstr "请求发送认证信息失败! I/O 异常. {0}"
+
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:210
+msgid "Invalid Mac Address, please select the address registered in ip.jlu.edu.cn"
+msgstr "MAC 地址错误, 请选择在网络中心注册的地址."
+
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:212
+msgid "Invalid username or password."
+msgstr "用户名或密码错误."
+
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:214
+msgid "Failed to login, unknown error."
+msgstr "登录失败, 发生了未知错误."
+
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:507
+msgid "Exception when logout."
+msgstr "注销异常……"
+
+#: com/youthlin/jlu/drcom/task/DrcomTask.java:512
+msgid "Logout success."
+msgstr "注销成功"
+
+#: com/youthlin/jlu/drcom/util/FxUtil.java:45
+msgid "Error"
+msgstr "错误"
+
+#: com/youthlin/jlu/drcom/util/FxUtil.java:52
+msgid "The exception stacktrace was:"
+msgstr "异常栈："
+
+#: com/youthlin/jlu/drcom/util/FxUtil.java:78
+msgid "Note"
+msgstr "提示"

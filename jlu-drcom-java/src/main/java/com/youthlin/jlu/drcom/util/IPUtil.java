@@ -20,28 +20,51 @@ import java.util.List;
 public class IPUtil {
     private static final Logger log = LoggerFactory.getLogger(IPUtil.class);
 
-    public static List<HostInfo> getHostInfo() {
+    public static <T> List<T> asList(Enumeration<T> enumeration) {
+        List<T> ret = new ArrayList<>();
+        while (enumeration.hasMoreElements()) {
+            ret.add(enumeration.nextElement());
+        }
+        return ret;
+    }
+
+    public interface OnGetHostInfoCallback {
+        void update(int current, int total);
+
+        void done(List<HostInfo> hostInfoList);
+    }
+
+    public static List<HostInfo> getHostInfo(OnGetHostInfoCallback callback) {
         List<HostInfo> hostInfoList = new ArrayList<>();
         try {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
             if (networkInterfaces == null) {
                 return hostInfoList;//空结果 -> 补救:使用配置文件手动指定
             }
-            while (networkInterfaces.hasMoreElements()) {
-                NetworkInterface networkInterface = networkInterfaces.nextElement();
+            List<NetworkInterface> networkInterfacesList = asList(networkInterfaces);
+            int size = networkInterfacesList.size();
+            int index = 0;
+            for (NetworkInterface networkInterface : networkInterfacesList) {
+                index++;
+                callback.update(index, size);
+                if (!networkInterface.isUp()) {
+                    continue;
+                }
                 String addr = null;
                 String hostname = null;
                 List<InterfaceAddress> interfaceAddresses = networkInterface.getInterfaceAddresses();
                 for (InterfaceAddress interfaceAddress : interfaceAddresses) {
                     InetAddress address = interfaceAddress.getAddress();
-                    String hostAddress = address.getHostAddress();
+                    //log.trace("{}/{}. address = {}", index, size, address);
+                    String hostAddress = address.getHostAddress();//to耗时do
                     if (hostAddress.contains(".")) {// not ':' -> IPv6
                         addr = hostAddress;
                         hostname = address.getHostName();
                         break;
                     }
                 }
-                String dashMAC = getDashMAC(networkInterface.getHardwareAddress());
+                byte[] hardwareAddress = networkInterface.getHardwareAddress();//to耗时do
+                String dashMAC = getDashMAC(hardwareAddress);
                 //log.trace("Dash Mac = {}", dashMAC);
                 if (dashMAC != null && dashMAC.length() == 17 && addr != null && hostname != null) { // 00-00-00-00-00-00
                     HostInfo hostInfo = new HostInfo(hostname, dashMAC, networkInterface.getDisplayName());
@@ -52,6 +75,7 @@ public class IPUtil {
         } catch (SocketException e) {
             log.debug("Socket Exception: {}", e.getMessage(), e);
         }
+        callback.done(hostInfoList);
         return hostInfoList;
     }
 
@@ -79,7 +103,11 @@ public class IPUtil {
             }
             //B 类：128.0.0.0 到 191.255.255.255  //B 类：172.16.0.0 到 172.31.255.255
             else if (a >= 128 && a < 192) {
-                if (!(a == 172 && (b >= 16 && b < 31))) {
+                // 169.254.X.X 是保留地址。
+                // 如果你的 IP 地址是自动获取 IP 地址，
+                // 而你在网络上又没有找到可用的 DHCP 服务器。就会得到其中一个 IP。
+                // UPDATE at 2017-01-23: http://baike.baidu.com/subview/8370/15816170.htm#5
+                if (!(a == 172 && (b >= 16 && b < 31)) && !(a == 169 && b == 254)) {
                     return true;
                 }
             }

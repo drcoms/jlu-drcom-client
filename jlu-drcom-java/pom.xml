@@ -6,7 +6,7 @@
 
     <groupId>com.youthlin</groupId>
     <artifactId>jlu-drcom-java</artifactId>
-    <version>1.0</version>
+    <version>1.0.2</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -23,7 +23,12 @@
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
         </dependency>
-
+        <dependency>
+            <!-- https://github.com/YouthLin/java-utils/tree/master/i18n -->
+            <groupId>com.youthlin</groupId>
+            <artifactId>i18n</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
