@@ -4,6 +4,16 @@
 >- https://github.com/YouthLin/jlu-drcom-client/tree/master/jlu-drcom-java  
 >- https://github.com/drcoms/jlu-drcom-client/tree/master/jlu-drcom-java  
 
+## 特性
+- 可共享 WiFi
+- 图形化界面
+- 跨平台
+- 记住密码
+- 自动登录
+- 保持在线
+- 密码加密存储
+- 多语言支持
+
 ## 下载
 点此链接选择最新版下载 [http://dwz.cn/drcombin](http://dwz.cn/bindrcom) (https://github.com/YouthLin/jlu-drcom-client/tree/master/jlu-drcom-java/bin)    
 如果您有兴趣,可以填一下调查问卷: [http://dwz.cn/javadrcomwj](https://wj.qq.com/s/1036693/3e7b)  
@@ -25,8 +35,9 @@ DOS 窗口打开，而 C 语言版由于引用的头文件在 Windows 下不兼�
 Java 写一个 GUI 版本的客户端，因此就有了项目。
 
 ## 使用前提
+本软件依赖 Java 8 环境。
 >如果您没有 Java 环境  
-请您到 http://java.com 下载最新版 Java. (Java8 )  
+请您到 http://java.com 下载最新版 Java. (Java 8)  
 相信我，这花不了几分钟.  
 
 > 如果您已有 Java 环境  
@@ -112,6 +123,17 @@ Java 写一个 GUI 版本的客户端，因此就有了项目。
 - 新增：浏览器 ALT+Left/Right 前进后退(虽然并没有人会用)
 - 改进：密码存储策略，不再是明文存储，conf 文件
 - 修复：Linux 下的对话框「查看详情」导致界面错乱
+
+## 1.0.2 版更新内容
+- 改进：细节上的用户体验
+- 新增：多语言支持
+> 可通过启动参数 `-Duser.language=en` 体验英语环境界面, 
+> 暂只支持中英语言, 若想支持其他语言，
+> 请按照源代码中 `/src/main/resource/Drcom_zh.po` 
+> 模板编写目标语言 po 文件(您可能需要使用 PoEdit 等翻译软件)
+> 然后发起 PR 请求.  
+- 英文界面  
+  ![多语言](screenshots/Lang.png)
 
 ## TODO
 开学后收集反馈
