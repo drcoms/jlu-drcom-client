@@ -35,6 +35,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.time.Year;
 import java.util.List;
 import java.util.Optional;
@@ -134,7 +135,7 @@ public class AppController implements Initializable {
                 String username = conf.getProperty(Constants.KEY_USERNAME, "");
                 usernameTextField.setText(username);
                 String pass = conf.getProperty(Constants.KEY_PASSWORD, "");
-                {
+                try {
                     //@since 1.0.1 使用 3DES 加密密码进行存储
                     String version = conf.getProperty(Constants.KEY_VERSION, "");
                     //上次加密的 key username 可长达25位 因此 lastKey 放在前
@@ -146,6 +147,9 @@ public class AppController implements Initializable {
                             //log.trace("load key = {}, pass = {}", key, pass);
                         }
                     }
+                } catch (Exception e) {
+                    log.debug("读取保存的密码时出现异常, 可能的原因: 上次未正确关闭软件. {}", e.getMessage(), e);
+                    pass = "";
                 }//第一个版本是明文
                 ///log.trace("load pass = {}", pass);
                 passwordField.setText(pass);
@@ -414,7 +418,10 @@ public class AppController implements Initializable {
         } else {
             yearStr = Constants.COPYRIGHT_YEAR_START;
         }
-        Alert alert = FxUtil.buildAlert("CC BY-NC-SA\n© " + yearStr + " Youth．霖\n" + Constants.ARTICLE_URL);
+        Alert alert = FxUtil.buildAlert(MessageFormat.format(
+                "© {0} {1}\nQQ 群：{2}\n许   可：{3}\n介   绍：{4}\n",
+                yearStr, "Youth．霖", "597417651", "CC BY-NC-SA", Constants.ARTICLE_URL)
+        );
         ButtonType contact = new ButtonType("联系作者");
         ButtonType projectHome = new ButtonType("项目主页");
         alert.getButtonTypes().addAll(contact, projectHome);
