@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--http://cn.bing.com/ImageResolution.aspx?w=320&amp;h=320-->
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" onKeyReleased="#onKeyReleased" xmlns="http://javafx.com/javafx/8.0.72"
+            fx:controller="com.youthlin.jlu.drcom.controller.AppController">
+    <top>
+        <MenuBar useSystemMenuBar="true">
+            <Menu fx:id="fileMenu" mnemonicParsing="false" text="文件(F)">
+                <MenuItem onAction="#onNoticeMenuItemClick" text="校园网通知" fx:id="noticeMenuItem"/>
+                <MenuItem accelerator="CTRL+X" onAction="#onExitMenuItemClick" text="退出" fx:id="quitMenuItem"/>
+            </Menu>
+            <Menu fx:id="helpMenu" mnemonicParsing="false" text="帮助(H)">
+                <MenuItem onAction="#onInfoMenuItemClick" text="说明" fx:id="introduceMenuItem"/>
+                <MenuItem onAction="#onAboutMenuItemClick" text="关于" fx:id="aboutMenuItem"/>
+            </Menu>
+        </MenuBar>
+    </top>
+    <center>
+        <VBox alignment="center">
+            <GridPane alignment="BASELINE_CENTER" hgap="10" vgap="10">
+                <padding>
+                    <Insets bottom="5" left="5" right="5" top="5"/>
+                </padding>
+                <Text fx:id="welcomeText" text="欢迎使用 JLU Drcom Java 版" GridPane.columnIndex="0" GridPane.columnSpan="4"
+                      GridPane.rowIndex="0"/>
+
+                <Label fx:id="usernameLabel" text="账号" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <TextField fx:id="usernameTextField" onKeyReleased="#onKeyReleased" promptText="chenml5513"
+                           GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="1">
+                    <tooltip>
+                        <Tooltip fx:id="usernameToolTip" text="吉大邮箱账号@之前的部分"/>
+                    </tooltip>
+                </TextField>
+
+                <Label fx:id="passwordLabel" text="密码" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <PasswordField fx:id="passwordField" onKeyReleased="#onKeyReleased" promptText="邮箱密码"
+                               GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2">
+                    <tooltip>
+                        <Tooltip fx:id="passwordToolTip" text="吉大邮箱密码"/>
+                    </tooltip>
+                </PasswordField>
+
+                <Label text="MAC" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                <ComboBox fx:id="macComboBox" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="3">
+                    <tooltip>
+                        <Tooltip fx:id="macToolTip" text="在网络中心登记的物理地址"/>
+                    </tooltip>
+                </ComboBox>
+
+                <Label fx:id="rememberLabel" onMouseClicked="#onRememberLabelClick" text="记住密码" GridPane.columnIndex="0"
+                       GridPane.rowIndex="4"/>
+                <CheckBox fx:id="rememberCheckBox" onAction="#onRememberAction" selected="true" GridPane.columnIndex="1"
+                          GridPane.rowIndex="4">
+                </CheckBox>
+                <Label fx:id="autoLoginLabel" onMouseClicked="#onAutoLabelClick" text="自动登录" GridPane.columnIndex="2"
+                       GridPane.rowIndex="4"/>
+                <CheckBox fx:id="autoLoginCheckBox" onAction="#onAutoAction" GridPane.columnIndex="3"
+                          GridPane.rowIndex="4">
+                </CheckBox>
+
+                <ImageView fx:id="imageView" visible="false" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
+                <Button fx:id="loginButton" onAction="#onLoginButtonClick" text="登录(L)" GridPane.columnIndex="1"
+                        GridPane.rowIndex="6"/>
+                <Button fx:id="logoutButton" alignment="BASELINE_RIGHT" onAction="#onExitMenuItemClick" text="退出(X)"
+                        textAlignment="CENTER" GridPane.columnIndex="3" GridPane.rowIndex="6"/>
+
+                <Label fx:id="tipLabel" textFill="red" GridPane.columnIndex="0" GridPane.columnSpan="4"
+                       GridPane.rowIndex="7"/>
+                <columnConstraints>
+                    <ColumnConstraints/>
+                    <ColumnConstraints/>
+                    <ColumnConstraints/>
+                    <ColumnConstraints/>
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints/>
+                    <RowConstraints/>
+                    <RowConstraints/>
+                    <RowConstraints/>
+                    <RowConstraints/>
+                    <RowConstraints/>
+                    <RowConstraints/>
+                    <RowConstraints/>
+                </rowConstraints>
+
+            </GridPane>
+        </VBox>
+    </center>
+    <bottom>
+        <ToolBar style="-fx-border-color: #ccc;">
+            <Label fx:id="statusLabel" text="就绪"/>
+        </ToolBar>
+    </bottom>
+</BorderPane>
