@@ -37,19 +37,37 @@
 
 #include "md5.h"
 
+char user[20];
+char pass[20];
+uint64_t mac;
+void readrcom(){
+	FILE *file;
+	file = fopen("drcom.conf","r");
+	fgets(user,6,file);
+	fgets(user,20,file);
+	fgets(pass,6,file);
+	fgets(pass,20,file);
+	fscanf(file,"%lx",&mac);
+	fclose(file);
+	
+}
+
 // 必须修改，帐号密码和 mac 地址是绑定的
-char user[] = "change to your account name here";
-char pass[] = "change to your password here";
-uint64_t mac = 0x000000000000; // echo 0x`ifconfig eth | egrep -io "([0-9a-f]{2}:){5}[0-9a-f]{2}" | tr -d ":"`
+// echo 0x`ifconfig eth | egrep -io "([0-9a-f]{2}:){5}[0-9a-f]{2}" | tr -d ":"`
 
 
 // 不一定要修改
 char host[] = "drcom";
 char os[] = "drcom";
-int user_len = sizeof(user) - 1;
-int pass_len = sizeof(pass) - 1;
+int user_len;
+int pass_len;
 int host_len = sizeof(host) - 1;
 int os_len = sizeof(os) - 1;
+
+void countlen(){
+	user_len = strlen(user) - 1;
+	pass_len = strlen(pass) - 1;
+}
 
 // TODO 增加从文件读取参数
 
@@ -389,6 +407,8 @@ void logout_signal(int signum)
 
 int main(int argc, char **argv)
 {
+	readrcom();
+	countlen();
 	int sock, ret;
 	unsigned char send_data[SEND_DATA_SIZE];
 	char recv_data[RECV_DATA_SIZE];

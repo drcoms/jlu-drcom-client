@@ -184,7 +184,7 @@ def mkpkt(salt, usr, pwd, mac):
     data += md5sum(data + '\x14\x00\x07\x0b')[:8] + '\x01'+'\x00'*4
     data += host_name.ljust(71, '\x00')
     data += '\x01' + host_os.ljust(128, '\x00')
-    data += '\x6d\x00\x00'+chr(len(pwd))
+    data += '\x6e\x00\x00'+chr(len(pwd))
     data += ror(md5sum('\x03\x01'+salt+pwd), pwd)
     data += '\x02\x0c'
     data += checksum(data+'\x01\x26\x07\x11\x00\x00'+dump(mac))
