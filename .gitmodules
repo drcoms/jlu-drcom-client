@@ -1,0 +1,3 @@
+[submodule "go-jlu-drcom-client"]
+        path = go-jlu-drcom-client
+        url = git://github.com/wucongyou/go-jlu-drcom-client.git
