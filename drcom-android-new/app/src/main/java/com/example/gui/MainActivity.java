@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     loginButton.setEnabled(true);
                     adjustUI(true);
                     status = STATUS.online;
-                    SharedPreferences.Editor editor = getSharedPreferences("name_pass_mac", MODE_MULTI_PROCESS).edit();
+                    SharedPreferences.Editor editor = getSharedPreferences("name_pass_mac", MODE_PRIVATE).edit();
                     editor.clear();
                     if (isNotSave) {
                         editor.apply();
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    SharedPreferences settingsPreferences = getSharedPreferences(SettingsActivity.FILE_NAME, MODE_MULTI_PROCESS);
+                    SharedPreferences settingsPreferences = getSharedPreferences(SettingsActivity.FILE_NAME, MODE_PRIVATE);
                     if (isAutoReconnect && keepBinder.canReconnect()) {
                         Log.d(TAG, "run: 无限重连中");
                         // 读取设置
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         status = STATUS.online;
                         adjustUI(true);
                         // 读取保存的用户名密码MAC地址
-                        SharedPreferences preferences = getSharedPreferences("name_pass_mac", MODE_MULTI_PROCESS);
+                        SharedPreferences preferences = getSharedPreferences("name_pass_mac", MODE_PRIVATE);
                         userNameEditText.setText(preferences.getString("name", ""));
                         passwordEditText.setText(preferences.getString("pass", ""));
                         macAddrEditText.setText(preferences.getString("mac", ""));
@@ -176,12 +176,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bindService(intent, connection, BIND_AUTO_CREATE);
         // 读取保存的用户名密码MAC地址
         Log.d(TAG, "onCreate: 读取保存的密码");
-        SharedPreferences preferences = getSharedPreferences("name_pass_mac", MODE_MULTI_PROCESS);
+        SharedPreferences preferences = getSharedPreferences("name_pass_mac", MODE_PRIVATE);
         userNameEditText.setText(preferences.getString("name", ""));
         passwordEditText.setText(preferences.getString("pass", ""));
         macAddrEditText.setText(preferences.getString("mac", ""));
         // 读取设置
-        SharedPreferences settingsPreferences = getSharedPreferences(SettingsActivity.FILE_NAME, MODE_MULTI_PROCESS);
+        SharedPreferences settingsPreferences = getSharedPreferences(SettingsActivity.FILE_NAME, MODE_PRIVATE);
         isAutoReconnect = settingsPreferences.getBoolean(SettingsActivity.AUTO_RECONNECT, false);
         isNotSave = settingsPreferences.getBoolean(SettingsActivity.DO_NOT_SAVE, false);
     }
@@ -191,12 +191,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onRestart();
         Log.d(TAG, "onRestart: 重启界面");
         // 读取保存的用户名密码MAC地址
-        SharedPreferences preferences = getSharedPreferences("name_pass_mac", MODE_MULTI_PROCESS);
+        SharedPreferences preferences = getSharedPreferences("name_pass_mac", MODE_PRIVATE);
         userNameEditText.setText(preferences.getString("name", ""));
         passwordEditText.setText(preferences.getString("pass", ""));
         macAddrEditText.setText(preferences.getString("mac", ""));
         // 读取设置
-        SharedPreferences settingsPreferences = getSharedPreferences(SettingsActivity.FILE_NAME, MODE_MULTI_PROCESS);
+        SharedPreferences settingsPreferences = getSharedPreferences(SettingsActivity.FILE_NAME, MODE_PRIVATE);
         isAutoReconnect = settingsPreferences.getBoolean(SettingsActivity.AUTO_RECONNECT, false);
         isNotSave = settingsPreferences.getBoolean(SettingsActivity.DO_NOT_SAVE, false);
         // 设置当前状态以及按钮是否可用
@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             stopService(new Intent(this, KeepService.class));
         }
         if (isNotSave) {
-            SharedPreferences.Editor editor = getSharedPreferences("name_pass_mac", MODE_MULTI_PROCESS).edit();
+            SharedPreferences.Editor editor = getSharedPreferences("name_pass_mac", MODE_PRIVATE).edit();
             editor.clear();
             editor.apply();
             Log.d(TAG, "onDestroy: 已清除密码");
