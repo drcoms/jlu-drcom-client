@@ -1,3 +1,6 @@
 [submodule "go-jlu-drcom-client"]
         path = go-jlu-drcom-client
         url = git://github.com/wucongyou/go-jlu-drcom-client.git
+[submodule "dr-jlu-win32"]
+	path = dr-jlu-win32
+	url = https://github.com/ImFengLala/dr-jlu-win32
