@@ -58,7 +58,7 @@ def bind_nic():
         print('Indicate nic feature need to be run under Unix based system.')
         return '0.0.0.0'
     except IOError as e:
-        print(nic_name + 'is unacceptable !')
+        print(nic_name + ' is unacceptable !')
         return '0.0.0.0'
     finally:
         return '0.0.0.0'
