@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding:   utf-8
 # license:  AGPL-V3
+# tested:   Windows 10, WSL 1
 
 import re
 import socket
@@ -87,7 +88,7 @@ def log(*args, **kwargs):
     print(*args, **kwargs)
     if DEBUG and platform.uname().system != 'Windows':
         with open(LOG_PATH,'a') as f:
-            f.write(s + '\n')
+            f.write(str(s) + '\n')
 
 
 def challenge(svr, ran):
@@ -370,7 +371,7 @@ def daemon():
 def main():
     if not IS_TEST:
         daemon()
-        execfile(CONF, globals())
+        exec(open(CONF).read(), globals())
     log("auth svr:", server, "\nusername:", username , 
         "\npassword:", password, "\nmac:", str(hex(mac)))
     log(bind_ip)

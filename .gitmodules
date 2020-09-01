@@ -4,6 +4,7 @@
 [submodule "dr-jlu-win32"]
 	path = dr-jlu-win32
 	url = https://github.com/ImFengLala/dr-jlu-win32
-[submodule "jlu-drcom-csharp"]
-	path = jlu-drcom-csharp
+
+[submodule "jlu-drcom-dotnet"]
+	path = jlu-drcom-dotnet
 	url = https://github.com/leviolet/DrcomDotnet
