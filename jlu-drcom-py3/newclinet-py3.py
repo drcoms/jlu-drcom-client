@@ -371,7 +371,8 @@ def daemon():
 def main():
     if not IS_TEST:
         daemon()
-        exec(open(CONF).read(), globals())
+        with open(CONF) as f:
+            exec(f.read(), globals())
     log("auth svr:", server, "\nusername:", username , 
         "\npassword:", password, "\nmac:", str(hex(mac)))
     log(bind_ip)
